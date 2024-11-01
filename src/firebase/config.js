@@ -5,16 +5,15 @@ import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAGYw6ixHTF0Gd7JQzngHGEwbemAAiLdDA",
-  authDomain: "delibrary-3c58b.firebaseapp.com",
-  projectId: "delibrary-3c58b",
-  storageBucket: "delibrary-3c58b.appspot.com",
-  messagingSenderId: "863665677931",
-  appId: "1:863665677931:web:4ab1613e6ab0f14705f32e",
-  measurementId: "G-N36HQVCQSY",
+  apiKey: "AIzaSyAPsR9VjpGdlQCZ6ICFSYuVT798p3I-cV0",
+  authDomain: "birmbook-2194f.firebaseapp.com",
+  projectId: "birmbook-2194f",
+  storageBucket: "birmbook-2194f.firebasestorage.app",
+  messagingSenderId: "1014517381526",
+  appId: "1:1014517381526:web:dc99fbbd59cac714b5c5b7",
+  measurementId: "G-GCSL4VPBD9",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 export const auth = getAuth(app);
