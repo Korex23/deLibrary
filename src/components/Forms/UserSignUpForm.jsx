@@ -5,6 +5,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { uploadToCloudinary } from "../../Upload";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import Withdrawal from "../../Wallet/Withdrawal";
 
 const UserSignUpForm = () => {
   const navigate = useNavigate();
@@ -78,6 +79,8 @@ const UserSignUpForm = () => {
         bookspublished: [],
         booksbookmarked: [],
         currentCart: [],
+        depositHistory: [],
+        withdrawalHistory: [],
         walletbalance: 0,
         isCustomer: false,
         isAuthor: false,

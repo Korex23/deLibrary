@@ -40,24 +40,27 @@ const Onboarding = () => {
     // Add navigation or role handling logic here
     await updateDoc(doc(db, "users", user.uid), {
       isAuthor: true, // Assuming you have a field isRead to track read status
+      isCustomer: true,
     });
     navigate("/dashboard");
   };
 
   return (
-    <div className="flex justify-center items-center flex-wrap min-h-screen bg-gray-100 gap-5">
-      <SelectRoleCard
-        title="Customer"
-        description="Access exclusive deals, rewards, and personalized recommendations."
-        image={customer}
-        onSelect={handleSelectCustomer}
-      />
-      <SelectRoleCard
-        title="Author"
-        description="Share your expertise, publish articles, and engage with a community of readers."
-        image={author}
-        onSelect={handleSelectAuthor}
-      />
+    <div>
+      <div className="flex justify-center items-center flex-wrap min-h-screen bg-gray-100 gap-5">
+        <SelectRoleCard
+          title="Customer"
+          description="Access exclusive deals, rewards, and personalized recommendations."
+          image={customer}
+          onSelect={handleSelectCustomer}
+        />
+        <SelectRoleCard
+          title="Author"
+          description="Share your expertise, publish articles, and engage with a community of readers."
+          image={author}
+          onSelect={handleSelectAuthor}
+        />
+      </div>
     </div>
   );
 };

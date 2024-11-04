@@ -3,6 +3,9 @@ import UserSignUpForm from "./components/Forms/UserSignUpForm";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Dashboard from "./CustomerDashboard/Dashboard";
 import ProtectedRoutes from "./ProtectedRoutes";
+import Sidebar from "./components/Navabr/Sidebar";
+import AuthorDashboard from "./PublishersDashboard/AuthorsDashbard";
+import Wallet from "./Wallet/Wallet";
 
 const BrowserRouter = createBrowserRouter([
   {
@@ -15,6 +18,7 @@ const BrowserRouter = createBrowserRouter([
   },
   {
     path: "/dashboard",
+    element: <Sidebar />,
     children: [
       {
         index: true,
@@ -24,9 +28,13 @@ const BrowserRouter = createBrowserRouter([
         path: "author",
         element: (
           <ProtectedRoutes>
-            <div>Admin Dashboard</div>,
+            <AuthorDashboard />
           </ProtectedRoutes>
         ),
+      },
+      {
+        path: "wallet",
+        element: <Wallet />,
       },
     ],
   },
