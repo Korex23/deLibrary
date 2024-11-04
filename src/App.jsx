@@ -6,11 +6,16 @@ import ProtectedRoutes from "./ProtectedRoutes";
 import Sidebar from "./components/Navabr/Sidebar";
 import AuthorDashboard from "./PublishersDashboard/AuthorsDashbard";
 import Wallet from "./Wallet/Wallet";
+import SignInForm from "./components/Forms/SignInForm";
 
 const BrowserRouter = createBrowserRouter([
   {
     path: "/",
     element: <UserSignUpForm />,
+  },
+  {
+    path: "/signin",
+    element: <SignInForm />,
   },
   {
     path: "/onboarding",
