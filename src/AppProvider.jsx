@@ -1,9 +1,10 @@
 import React from "react";
+import { UserProvider } from "./context/context";
 
-const AppProvider = () => {
+const AppProvider = ({ children }) => {
   return (
     <>
-      <div>AppProvider</div>
+      <UserProvider>{children}</UserProvider>
     </>
   );
 };
