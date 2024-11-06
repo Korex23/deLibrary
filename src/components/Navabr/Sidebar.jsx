@@ -1,10 +1,19 @@
 import { useState } from "react";
 import { Link, Outlet, NavLink } from "react-router-dom";
 import { useUser } from "../../context/context";
+import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase/config";
 
 const Sidebar = () => {
-  const { user, logout } = useUser();
+  const { user } = useUser();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const logout = async () => {
+    await signOut(auth);
+    navigate("/signin");
+  };
 
   return (
     <>
@@ -46,7 +55,7 @@ const Sidebar = () => {
                     <Link to="/dashboard">Dashboard</Link>
                   </li>
                   <li>
-                    <Link to="/dashboard/author">Authors Section</Link>
+                    <Link to="author">Authors Section</Link>
                   </li>
                   <li>
                     <Link to="">My Books</Link>
@@ -61,7 +70,7 @@ const Sidebar = () => {
                     <Link to="">FAQ</Link>
                   </li>
                   <li>
-                    <Link to="">My Wallet</Link>
+                    <Link to="wallet">My Wallet</Link>
                   </li>
                 </ul>
                 {user && (
