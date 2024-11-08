@@ -7,6 +7,7 @@ import Sidebar from "./components/Navabr/Sidebar";
 import AuthorDashboard from "./PublishersDashboard/AuthorsDashbard";
 import Wallet from "./Wallet/Wallet";
 import SignInForm from "./components/Forms/SignInForm";
+import BookDetails from "./BooksCatalogue/BookDetails";
 
 const BrowserRouter = createBrowserRouter([
   {
@@ -40,6 +41,20 @@ const BrowserRouter = createBrowserRouter([
       {
         path: "wallet",
         element: <Wallet />,
+      },
+    ],
+  },
+  {
+    path: "books",
+    element: <Sidebar />,
+    children: [
+      {
+        index: true,
+        element: <div>Book Catalogue</div>,
+      },
+      {
+        path: ":bookId",
+        element: <BookDetails />,
       },
     ],
   },

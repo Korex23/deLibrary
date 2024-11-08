@@ -188,6 +188,7 @@ export const BooksProvider = ({ children }) => {
       const bookDoc = await getDoc(doc(db, "books", id));
       if (bookDoc.exists()) {
         setBookInfo(bookDoc.data());
+        console.log(bookDoc.data());
       } else {
         console.error("No such document!");
       }

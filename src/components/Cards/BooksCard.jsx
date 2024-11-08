@@ -1,6 +1,7 @@
 import React from "react";
 import { useBooks } from "../../context/BooksContext";
 import { FaShoppingCart, FaBookmark } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const BooksCard = () => {
   const { allBooks, AddToBookmarks, bookmarks } = useBooks();
@@ -43,12 +44,11 @@ const BooksCard = () => {
             </button>
 
             {/* View Button */}
-            <button
-              className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition duration-300"
-              onClick={() => alert(`Viewing ${book.title}`)}
-            >
-              View
-            </button>
+            <Link to={`/books/${book.id}`}>
+              <button className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition duration-300">
+                View
+              </button>
+            </Link>
 
             {/* Bookmark Button */}
             <button
