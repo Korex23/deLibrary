@@ -4,6 +4,7 @@ import BooksCard from "../components/Cards/BooksCard";
 import { useBooks } from "../context/BooksContext";
 import { useUser } from "../context/context";
 import { FaShoppingCart } from "react-icons/fa";
+import Cart from "../Cart/Cart";
 
 const AuthorDashboard = () => {
   const { booksPublished, getBookmarkedBooks } = useBooks();
@@ -106,6 +107,7 @@ const AuthorDashboard = () => {
             </div>
           </div>
         </div>
+        <Cart />
       </div>
     </>
   );

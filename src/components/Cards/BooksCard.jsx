@@ -2,9 +2,11 @@ import React from "react";
 import { useBooks } from "../../context/BooksContext";
 import { FaShoppingCart, FaBookmark } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useCart } from "../../context/CartContext";
 
 const BooksCard = () => {
   const { allBooks, AddToBookmarks, bookmarks } = useBooks();
+  const { addToCart } = useCart();
 
   // Helper function to check if a book is already bookmarked
   const isBookBookmarked = (bookId) => {
@@ -37,7 +39,7 @@ const BooksCard = () => {
             {/* Cart Button */}
             <button
               className="flex items-center bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition duration-300"
-              onClick={() => alert(`Added ${book.title} to Cart`)}
+              onClick={() => addToCart(book)}
             >
               <FaShoppingCart className="mr-2" />
               Cart
