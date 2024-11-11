@@ -20,7 +20,11 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
+  const [boughtBooks, setBoughtBooks] = useState([]);
   const [user, setUser] = useState(null);
+  const [name, setName] = useState("");
+
+  const publicKey = import.meta.env.VITE_PAYSTACK_KEY;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -33,6 +37,8 @@ export const CartProvider = ({ children }) => {
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setCart(userData.currentCart);
+          setBoughtBooks(userData.booksbought);
+          setName(`${userData.firstname} ${userData.lastname}`);
         } else {
           console.error("No such document!");
         }
@@ -78,9 +84,49 @@ export const CartProvider = ({ children }) => {
     return cart.reduce((total, book) => total + (book.price || 0), 0);
   };
 
+  const onSuccessCallback = async ({ reference }) => {
+    try {
+      // Show success message
+      toast.success(`Payment successful with reference ${reference}`);
+
+      // Update `booksbought` with current cart contents
+      const updatedBoughtBooks = [...boughtBooks, ...cart];
+      await updateDoc(doc(db, "users", user.uid), {
+        booksbought: updatedBoughtBooks,
+        currentCart: [], // Clear the cart in the database
+      });
+
+      // Update the state
+      setBoughtBooks(updatedBoughtBooks);
+      setCart([]); // Clear the local cart
+    } catch (error) {
+      console.error("Error updating books after purchase:", error);
+      toast.error("Error completing the purchase");
+    }
+  };
+
+  const componentProps = {
+    email: user?.email,
+    amount: getTotalPrice() * 100,
+    metadata: {
+      name,
+    },
+    publicKey,
+
+    text: "Pay with Paystack",
+    onSuccess: (reference) => onSuccessCallback(reference),
+    onClose: () => toast.error("Payment Cancelled"),
+  };
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, getTotalPrice }}
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        getTotalPrice,
+        boughtBooks,
+        componentProps,
+      }}
     >
       {children}
     </CartContext.Provider>
