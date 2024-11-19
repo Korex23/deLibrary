@@ -50,7 +50,7 @@ export const UserProvider = ({ children }) => {
 
   // Provide user and logout functionality to context consumers
   return (
-    <UserContext.Provider value={{ user, loading, logout }}>
+    <UserContext.Provider value={{ user, loading, logout, userDetails }}>
       {!loading && children}
     </UserContext.Provider>
   );

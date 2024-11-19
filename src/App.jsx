@@ -8,6 +8,7 @@ import AuthorDashboard from "./PublishersDashboard/AuthorsDashbard";
 import Wallet from "./Wallet/Wallet";
 import SignInForm from "./components/Forms/SignInForm";
 import BookDetails from "./BooksCatalogue/BookDetails";
+import { ToastContainer } from "react-toastify";
 
 const BrowserRouter = createBrowserRouter([
   {
@@ -61,7 +62,12 @@ const BrowserRouter = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={BrowserRouter} />;
+  return (
+    <>
+      <RouterProvider router={BrowserRouter} />
+      <ToastContainer />
+    </>
+  );
 }
 
 export default App;

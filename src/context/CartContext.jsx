@@ -53,7 +53,7 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (book) => {
     try {
       const newCart = [...cart, book];
-      console.log("New Cart Array:", newCart); // Check if newCart is correct
+      console.log("New Cart Array:", newCart);
       setCart(newCart);
       console.log("Setting new cart...");
       await updateDoc(doc(db, "users", user.uid), {
@@ -93,10 +93,31 @@ export const CartProvider = ({ children }) => {
       const updatedBoughtBooks = [...boughtBooks, ...cart];
       await updateDoc(doc(db, "users", user.uid), {
         booksbought: updatedBoughtBooks,
-        currentCart: [], // Clear the cart in the database
+        currentCart: [],
       });
 
-      // Update the state
+      for (const book of cart) {
+        const bookRef = doc(db, "books", book.id);
+        await updateDoc(bookRef, {
+          soldCopies: (book.soldCopies || 0) + 1,
+        });
+
+        const authorRef = doc(db, "users", book.authorId);
+        const authorDoc = await getDoc(authorRef);
+
+        if (authorDoc.exists()) {
+          const currentBalance = authorDoc.data().walletbalance || 0;
+
+          const updatedBalance = currentBalance + (book.price || 0) * 0.9;
+
+          await updateDoc(authorRef, {
+            walletbalance: updatedBalance,
+          });
+        } else {
+          console.error(`Author with ID ${book.authorId} not found.`);
+        }
+      }
+
       setBoughtBooks(updatedBoughtBooks);
       setCart([]); // Clear the local cart
     } catch (error) {

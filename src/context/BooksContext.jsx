@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { auth, db } from "../firebase/config";
 import {
   doc,
@@ -37,21 +43,25 @@ export const BooksProvider = ({ children }) => {
     price: 0,
     isbn: "",
     categories: [],
-    releaseDate: new Date(),
-    ratings: 0,
+    releaseDate: new Date().toISOString().split("T")[0],
+    ratings: [],
     soldCopies: 0,
     reviews: [],
+    allowedDistributors: [], // New property
+    isDistributorsAllowed: false, // New property
   });
   const [allBooks, setAllBooks] = useState([]);
   const [user, setUser] = useState(null);
+  const [users, setUsers] = useState([]);
   const [bookmarks, setBookmarks] = useState([]); // Updated to array for bookmarks
+  const [onlyMe, setOnlyMe] = useState(false);
+  const [anyone, setAnyone] = useState(false);
 
   const handleBookChangeForm = (e) => {
     const { name, value } = e.target;
     setBookInfo((prevBookInfo) => {
       switch (name) {
         case "price":
-        case "ratings":
         case "soldCopies":
           return { ...prevBookInfo, [name]: parseFloat(value) };
         case "releaseDate":
@@ -65,6 +75,16 @@ export const BooksProvider = ({ children }) => {
         case "backCover":
         case "pdf":
           return { ...prevBookInfo, [name]: e.target.files[0] };
+        case "allowedDistributors":
+          return {
+            ...prevBookInfo,
+            allowedDistributors: value,
+          };
+        case "isDistributorsAllowed":
+          return {
+            ...prevBookInfo,
+            isDistributorsAllowed: !prevBookInfo.isDistributorsAllowed,
+          };
         default:
           return { ...prevBookInfo, [name]: value };
       }
@@ -79,11 +99,32 @@ export const BooksProvider = ({ children }) => {
       setAllBooks(books);
       console.log(books);
     } catch (error) {
-      toast.error("Failed to fetch books.");
       console.error("Error fetching books:", error);
     }
   };
 
+  const getAllUsers = async () => {
+    try {
+      const usersCollection = collection(db, "users");
+      const querySnapshot = await getDocs(usersCollection);
+
+      const users = [];
+      querySnapshot.forEach((doc) => {
+        if (doc.id !== auth.currentUser.uid) {
+          // Exclude current user
+          users.push({
+            value: doc.id,
+            label: `${doc.data().firstname} ${doc.data().lastname}`,
+          });
+        }
+      });
+
+      return users;
+    } catch (error) {
+      console.error("Error retrieving users:", error);
+      return [];
+    }
+  };
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setLoading(true);
@@ -102,8 +143,14 @@ export const BooksProvider = ({ children }) => {
       setLoading(false);
     });
 
+    const fetchUsers = async () => {
+      const users = await getAllUsers();
+      setUsers(users);
+    };
+
+    fetchUsers();
+
     fetchAllBooks();
-    getPublishedBooks();
 
     return () => unsubscribe();
   }, [user]);
@@ -118,7 +165,6 @@ export const BooksProvider = ({ children }) => {
         },
       ],
     });
-    toast.success("Book published successfully!");
   };
 
   const updateAllBooks = async () => {
@@ -128,24 +174,22 @@ export const BooksProvider = ({ children }) => {
       const backCoverUrl = await uploadToCloudinary(bookInfo.backCover);
       const pdfUrl = await uploadToCloudinary(bookInfo.pdf);
 
-      // Destructure bookInfo, excluding the file properties
       const { frontCover, backCover, pdf, ...bookDataWithoutFiles } = bookInfo;
 
       const bookWithId = {
-        ...bookDataWithoutFiles, // Include all non-file fields
-        id: bookInfo.id || uuidv4(), // Generate an ID if not present
-        authorId: user.uid, // Set the author ID
-        frontCoverUrl, // Add URLs from Cloudinary
+        ...bookDataWithoutFiles,
+        id: bookInfo.id || uuidv4(),
+        authorId: user.uid,
+        frontCoverUrl,
         backCoverUrl,
         pdfUrl,
+        allowedDistributors: bookInfo.allowedDistributors,
+        isDistributorsAllowed: bookInfo.isDistributorsAllowed,
       };
 
-      // Save the document to Firestore
       await setDoc(doc(db, "books", bookWithId.id), bookWithId);
-
-      toast.success("Book added successfully!");
     } catch (error) {
-      toast.error("Failed to add book: " + error.message);
+      console.error("Error adding book:", error.message);
     }
   };
 
@@ -177,13 +221,14 @@ export const BooksProvider = ({ children }) => {
       querySnapshot.forEach((doc) => books.push(doc.data()));
       setBooksPublished(books);
       console.log(books);
+      return books;
     } catch (error) {
       toast.error("Failed to fetch books.");
       console.error("Error fetching books:", error);
     }
   };
 
-  const getABook = async (id) => {
+  const getABook = useCallback(async (id) => {
     try {
       const bookDoc = await getDoc(doc(db, "books", id));
       if (bookDoc.exists()) {
@@ -195,7 +240,7 @@ export const BooksProvider = ({ children }) => {
     } catch (error) {
       console.error("Error getting book:", error);
     }
-  };
+  }, []);
 
   const AddToBookmarks = async (id) => {
     if (bookmarks.some((bookmark) => bookmark.id === id)) {
@@ -215,18 +260,15 @@ export const BooksProvider = ({ children }) => {
       await updateDoc(doc(db, "users", user.uid), {
         booksbookmarked: updatedBookmarks,
       });
-      toast.success("Book bookmarked successfully!");
       console.log(updatedBookmarks);
     } catch (error) {
       console.error("Error updating bookmarks:", error);
-      toast.error("Failed to bookmark the book.");
     }
   };
 
   // Add this function to your context
   const getBookmarkedBooks = async (userId) => {
     try {
-      // Assuming you fetch the bookmarks of the user from a collection or database
       const userDocRef = doc(db, "users", userId);
       const userDoc = await getDoc(userDocRef);
       const bookmarks = userDoc.data().booksbookmarked;
@@ -241,6 +283,14 @@ export const BooksProvider = ({ children }) => {
       console.error("Error fetching bookmarked books:", error);
       return [];
     }
+  };
+
+  const updateBookInfoWithDistributors = (selectedOptions) => {
+    setBookInfo({
+      ...bookInfo,
+      allowedDistributors: selectedOptions || [],
+      isDistributorsAllowed: anyone || selectedOptions.length > 0,
+    });
   };
 
   return (
@@ -258,8 +308,14 @@ export const BooksProvider = ({ children }) => {
         setBookInfo,
         getPublishedBooks,
         AddToBookmarks,
+        users,
         bookmarks, // Export bookmarks to use in components
-        getBookmarkedBooks, // Export function to fetch bookmark
+        getBookmarkedBooks, // Export function to fetch bookmarked books
+        updateBookInfoWithDistributors,
+        onlyMe,
+        setOnlyMe,
+        anyone,
+        setAnyone,
       }}
     >
       {!loading && children}

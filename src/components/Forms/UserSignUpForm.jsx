@@ -84,6 +84,8 @@ const UserSignUpForm = () => {
         walletbalance: 0,
         isCustomer: false,
         isAuthor: false,
+        isReferred: false,
+        referredBy: "",
       });
       setFormData({
         firstname: "",
