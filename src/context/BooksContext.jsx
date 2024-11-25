@@ -20,6 +20,10 @@ import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import { uploadToCloudinary } from "../Upload";
+import { pdfjs } from "react-pdf"; // Import from react-pdf;
+
+// Set the workerSrc for PDF.js
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const BooksContext = createContext();
 
@@ -56,6 +60,8 @@ export const BooksProvider = ({ children }) => {
   const [bookmarks, setBookmarks] = useState([]); // Updated to array for bookmarks
   const [onlyMe, setOnlyMe] = useState(false);
   const [anyone, setAnyone] = useState(false);
+  const [currentBook, setCurrentBook] = useState(null);
+  const [updatePublishedBooks, setUpdatePublishedBooks] = useState([]);
 
   const handleBookChangeForm = (e) => {
     const { name, value } = e.target;
@@ -158,7 +164,7 @@ export const BooksProvider = ({ children }) => {
   const updateBooks = async () => {
     await updateDoc(doc(db, "users", user.uid), {
       bookspublished: [
-        ...booksPublished,
+        ...updatePublishedBooks,
         {
           id: bookInfo.id || uuidv4(),
           title: bookInfo.title,
@@ -169,11 +175,18 @@ export const BooksProvider = ({ children }) => {
 
   const updateAllBooks = async () => {
     try {
+      // Load the PDF to get the page count
+      const arrayBuffer = await bookInfo.pdf.arrayBuffer();
+      const pdfDocument = await pdfjs.getDocument({ data: arrayBuffer })
+        .promise;
+      const pageCount = pdfDocument.numPages;
+
       // Upload files to Cloudinary
       const frontCoverUrl = await uploadToCloudinary(bookInfo.frontCover);
       const backCoverUrl = await uploadToCloudinary(bookInfo.backCover);
       const pdfUrl = await uploadToCloudinary(bookInfo.pdf);
 
+      // Extract relevant book information without files
       const { frontCover, backCover, pdf, ...bookDataWithoutFiles } = bookInfo;
 
       const bookWithId = {
@@ -183,16 +196,18 @@ export const BooksProvider = ({ children }) => {
         frontCoverUrl,
         backCoverUrl,
         pdfUrl,
+        numberOfPages: pageCount, // Add the page count to the book object
         allowedDistributors: bookInfo.allowedDistributors,
         isDistributorsAllowed: bookInfo.isDistributorsAllowed,
       };
 
+      // Save the book data to Firestore
       await setDoc(doc(db, "books", bookWithId.id), bookWithId);
+      console.log("Book uploaded successfully!");
     } catch (error) {
       console.error("Error adding book:", error.message);
     }
   };
-
   const updateABook = async ({ id }) => {
     const updatedBookInfo = {
       ...bookInfo,
@@ -219,7 +234,13 @@ export const BooksProvider = ({ children }) => {
 
       const querySnapshot = await getDocs(booksQuery);
       querySnapshot.forEach((doc) => books.push(doc.data()));
+
+      const bookData = books.map((book) => ({
+        id: book.id,
+        title: book.title,
+      }));
       setBooksPublished(books);
+      setUpdatePublishedBooks(bookData);
       console.log(books);
       return books;
     } catch (error) {
@@ -232,7 +253,7 @@ export const BooksProvider = ({ children }) => {
     try {
       const bookDoc = await getDoc(doc(db, "books", id));
       if (bookDoc.exists()) {
-        setBookInfo(bookDoc.data());
+        setCurrentBook(bookDoc.data());
         console.log(bookDoc.data());
       } else {
         console.error("No such document!");
@@ -285,6 +306,24 @@ export const BooksProvider = ({ children }) => {
     }
   };
 
+  const getBoughtBooks = async (userId) => {
+    try {
+      const userDocRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userDocRef);
+      const boughtBooks = userDoc.data().booksbought;
+
+      // Find the corresponding books from the allBooks array
+      const books = allBooks.filter((book) =>
+        boughtBooks.some((boughtBook) => boughtBook.id === book.id)
+      );
+
+      return books; // Return the matching books
+    } catch (error) {
+      console.error("Error fetching bought books:", error);
+      return [];
+    }
+  };
+
   const updateBookInfoWithDistributors = (selectedOptions) => {
     setBookInfo({
       ...bookInfo,
@@ -312,10 +351,12 @@ export const BooksProvider = ({ children }) => {
         bookmarks, // Export bookmarks to use in components
         getBookmarkedBooks, // Export function to fetch bookmarked books
         updateBookInfoWithDistributors,
+        getBoughtBooks,
         onlyMe,
         setOnlyMe,
         anyone,
         setAnyone,
+        currentBook,
       }}
     >
       {!loading && children}

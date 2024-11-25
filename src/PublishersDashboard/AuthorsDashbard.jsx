@@ -5,11 +5,14 @@ import { useBooks } from "../context/BooksContext";
 import { useUser } from "../context/context";
 import { FaShoppingCart } from "react-icons/fa";
 import Cart from "../Cart/Cart";
+import { Link } from "react-router-dom";
+import BoughtBooksCard from "../components/Cards/BoughtBooksCard";
+import AllBoughtBooks from "../BooksCatalogue/AllBoughtBooks";
 
 const AuthorDashboard = () => {
   const { getBookmarkedBooks, getPublishedBooks } = useBooks();
-  const [bookmarks, setBookmarks] = useState([]); // Updated to array for bookmarks
-  const { user } = useUser();
+  const [bookmarks, setBookmarks] = useState([]);
+  const { user, userDetails } = useUser();
 
   const [booksPublished, setBooksPublished] = useState([]);
 
@@ -124,6 +127,10 @@ const AuthorDashboard = () => {
             ) : (
               <p>No bookmarked books yet.</p>
             )}
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Books Bought</h2>
+            <AllBoughtBooks />
           </div>
         </div>
       </div>

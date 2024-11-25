@@ -23,6 +23,9 @@ export const CartProvider = ({ children }) => {
   const [boughtBooks, setBoughtBooks] = useState([]);
   const [user, setUser] = useState(null);
   const [name, setName] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [referrers, setReferrers] = useState([]);
+  const [authorReferrer, setAuthorReferrer] = useState("");
 
   const publicKey = import.meta.env.VITE_PAYSTACK_KEY;
 
@@ -50,21 +53,38 @@ export const CartProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  const addToCart = async (book) => {
+  const addToCart = async (book, referralCode = "", referrerDetails = null) => {
     try {
-      const newCart = [...cart, book];
-      console.log("New Cart Array:", newCart);
+      // Add the book to the cart with the associated referral code and referrer
+      const newCart = [
+        ...cart,
+        {
+          ...book,
+          referralCode, // Attach the referral code directly
+          referrer: referrerDetails, // Attach the specific referrer details
+        },
+      ];
+
+      // Update cart state
       setCart(newCart);
-      console.log("Setting new cart...");
+      setReferralCode("");
+
+      // Persist cart in Firestore
       await updateDoc(doc(db, "users", user.uid), {
         currentCart: newCart,
       });
+
       toast.success("Book added to cart");
     } catch (error) {
       console.error("Error adding book to cart:", error);
       toast.error("Error adding book to cart");
     }
   };
+
+  console.log(cart);
+  // console.log(authorReferrer);
+
+  // console.log(referrers);
 
   const removeFromCart = async (bookId) => {
     try {
@@ -89,37 +109,112 @@ export const CartProvider = ({ children }) => {
       // Show success message
       toast.success(`Payment successful with reference ${reference}`);
 
-      // Update `booksbought` with current cart contents
-      const updatedBoughtBooks = [...boughtBooks, ...cart];
+      // Extract only book ID and title for each book in the cart
+      const booksToAdd = cart.map((book) => ({
+        id: book.id,
+        title: book.title,
+        numberOfPages: book.numberOfPages,
+      }));
+
+      // Merge cart contents (book ID and title) into `boughtBooks` and reset cart in database
+      const updatedBoughtBooks = [...boughtBooks, ...booksToAdd];
       await updateDoc(doc(db, "users", user.uid), {
         booksbought: updatedBoughtBooks,
         currentCart: [],
       });
 
+      // Process each book in the cart
       for (const book of cart) {
         const bookRef = doc(db, "books", book.id);
+
+        // Update the book's soldCopies count
         await updateDoc(bookRef, {
           soldCopies: (book.soldCopies || 0) + 1,
         });
 
+        // Handle distributor logic (if applicable)
+        if (book.referrer?.id) {
+          const distributorRef = doc(db, "users", book.referrer.id);
+          const distributorDoc = await getDoc(distributorRef);
+
+          if (distributorDoc.exists()) {
+            const currentDistributorBalance =
+              distributorDoc.data().walletbalance || 0;
+
+            // Update distributor's wallet balance
+            const updatedDistributorBalance =
+              currentDistributorBalance + (book.price || 0) * 0.1;
+
+            await updateDoc(distributorRef, {
+              walletbalance: updatedDistributorBalance,
+            });
+          }
+        }
+
+        // Handle author logic
         const authorRef = doc(db, "users", book.authorId);
         const authorDoc = await getDoc(authorRef);
 
         if (authorDoc.exists()) {
-          const currentBalance = authorDoc.data().walletbalance || 0;
+          const currentAuthorBalance = authorDoc.data().walletbalance || 0;
+          let updatedAuthorBalance;
 
-          const updatedBalance = currentBalance + (book.price || 0) * 0.9;
+          // Calculate author's wallet balance share based on referrer/distributor presence
+          if (book.referrer?.id) {
+            updatedAuthorBalance =
+              currentAuthorBalance + (book.price || 0) * 0.75; // Distributor exists
+          } else {
+            updatedAuthorBalance =
+              currentAuthorBalance + (book.price || 0) * 0.85; // No distributor
+          }
+
+          // Get the current date
+          const currentDate = new Date().toISOString();
+
+          // Retrieve current boughtbooks array from author data or initialize it
+          const currentAuthorBooks = authorDoc.data().booksBoughtByPeople || [];
+
+          // Add the new book details to the array
+          const newBookEntry = {
+            id: book.id,
+            title: book.title,
+            date: currentDate,
+            price: book.price || 0,
+          };
+          const updatedAuthorBooks = [...currentAuthorBooks, newBookEntry];
 
           await updateDoc(authorRef, {
-            walletbalance: updatedBalance,
+            walletbalance: updatedAuthorBalance,
+            booksBoughtByPeople: updatedAuthorBooks, // Update the author's boughtbooks array
           });
+
+          // Handle author's referrer (if exists)
+          const authorReferrerId = authorDoc.data().referredBy;
+          if (authorReferrerId) {
+            const authorReferrerRef = doc(db, "users", authorReferrerId);
+            const referrerDoc = await getDoc(authorReferrerRef);
+
+            if (referrerDoc.exists()) {
+              const currentReferrerBalance =
+                referrerDoc.data().walletbalance || 0;
+
+              // Update author's referrer's wallet balance
+              const updatedReferrerBalance =
+                currentReferrerBalance + (book.price || 0) * 0.05;
+
+              await updateDoc(authorReferrerRef, {
+                walletbalance: updatedReferrerBalance,
+              });
+            }
+          }
         } else {
           console.error(`Author with ID ${book.authorId} not found.`);
         }
       }
 
+      // Update local state
       setBoughtBooks(updatedBoughtBooks);
-      setCart([]); // Clear the local cart
+      setCart([]); // Clear local cart
     } catch (error) {
       console.error("Error updating books after purchase:", error);
       toast.error("Error completing the purchase");
@@ -145,8 +240,10 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         getTotalPrice,
+        setReferralCode,
         boughtBooks,
         componentProps,
+        referralCode,
       }}
     >
       {children}

@@ -9,6 +9,7 @@ import Wallet from "./Wallet/Wallet";
 import SignInForm from "./components/Forms/SignInForm";
 import BookDetails from "./BooksCatalogue/BookDetails";
 import { ToastContainer } from "react-toastify";
+import ReadABook from "./BooksCatalogue/ReadABook";
 
 const BrowserRouter = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ const BrowserRouter = createBrowserRouter([
       {
         path: ":bookId",
         element: <BookDetails />,
+      },
+      {
+        path: "read/:bookId",
+        element: <ReadABook />,
       },
     ],
   },

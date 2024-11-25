@@ -86,6 +86,7 @@ const UserSignUpForm = () => {
         isAuthor: false,
         isReferred: false,
         referredBy: "",
+        booksBoughtByPeople: [],
       });
       setFormData({
         firstname: "",

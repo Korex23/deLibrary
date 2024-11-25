@@ -21,7 +21,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 const BookDetails = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
-  const { getABook, bookInfo } = useBooks();
+  const { getABook, currentBook } = useBooks();
   const { userDetails } = useUser();
   const { addToCart } = useCart();
   const [numPages, setNumPages] = useState(null);
@@ -65,17 +65,17 @@ const BookDetails = () => {
   // };
 
   useEffect(() => {
-    if (bookInfo) {
-      setRatings(bookInfo.ratings || []);
-      setReviews(bookInfo.reviews);
+    if (currentBook) {
+      setRatings(currentBook.ratings || []);
+      setReviews(currentBook.reviews);
       console.log(reviews);
 
-      const existingRating = bookInfo.ratings.find(
+      const existingRating = currentBook.ratings.find(
         (rating) => rating.uid === currentUser.uid
       );
       if (existingRating) setUserRating(existingRating.rating);
     }
-  }, [bookInfo, currentUser]);
+  }, [currentBook, currentUser]);
 
   useEffect(() => {
     if (ratings.length > 0) {
@@ -155,7 +155,7 @@ const BookDetails = () => {
     return <p className="text-center mt-4">Loading book details...</p>;
   }
 
-  if (!bookInfo) {
+  if (!currentBook) {
     return <p className="text-center mt-4">Book not found!</p>;
   }
 
@@ -172,33 +172,33 @@ const BookDetails = () => {
             Books
           </span>
           {" / "}
-          <span>{bookInfo.title}</span>
+          <span>{currentBook.title}</span>
         </nav>
 
         {/* Book Details */}
         <div className="flex flex-col items-center p-6">
-          <h1 className="text-3xl font-bold mb-6">{bookInfo.title}</h1>
+          <h1 className="text-3xl font-bold mb-6">{currentBook.title}</h1>
           <img
-            src={bookInfo.frontCoverUrl}
-            alt={bookInfo.title}
+            src={currentBook.frontCoverUrl}
+            alt={currentBook.title}
             className="h-64 w-full md:w-48 object-cover rounded-lg mb-4"
           />
-          <p className="text-lg mb-2">{bookInfo.description}</p>
+          <p className="text-lg mb-2">{currentBook.description}</p>
           <span className="text-gray-500 mb-4">
-            Categories: {bookInfo.categories.join(", ")}
+            Categories: {currentBook.categories.join(", ")}
           </span>
-          <p className="text-lg font-bold mt-4">Price: ${bookInfo.price}</p>
+          <p className="text-lg font-bold mt-4">Price: ${currentBook.price}</p>
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
             <button
-              onClick={() => addToCart(bookInfo)}
+              onClick={() => addToCart(currentBook)}
               className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg flex items-center gap-2"
             >
               <FaShoppingCart />
               Add to Cart
             </button>
             <a
-              href={bookInfo.pdfUrl}
-              download={`${bookInfo.title}.pdf`}
+              href={currentBook.pdfUrl}
+              download={`${currentBook.title}.pdf`}
               className="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg"
             >
               Download PDF
@@ -208,9 +208,9 @@ const BookDetails = () => {
           {/* PDF Viewer */}
           <div className="mt-4 w-full flex flex-col items-center">
             <Document
-              file={bookInfo.pdfUrl}
+              file={currentBook.pdfUrl}
               onLoadSuccess={onDocumentLoadSuccess}
-              loading={<p>Loading {bookInfo.title}</p>}
+              loading={<p>Loading {currentBook.title}</p>}
             >
               <Page
                 pageNumber={currentPage}

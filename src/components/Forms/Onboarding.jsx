@@ -68,6 +68,7 @@ const Onboarding = () => {
       await updateDoc(doc(db, "users", user.uid), {
         isAuthor: true,
         isCustomer: true,
+        isReferred: true,
         ...(referrerData && {
           referrer: referrerData.id,
           referredBy: referrerData.name,
