@@ -105,28 +105,30 @@ export const CartProvider = ({ children }) => {
     return cart.reduce((total, book) => total + (book.price || 0), 0);
   };
 
-  const onSuccessCallback = async ({ reference }) => {
+  const onSuccessCallback = async ({ reference }, formData) => {
+    console.log("Payment successful, reference: ", reference);
+    console.log("Form data received in onSuccess:", formData);
     try {
       // Show success message
       toast.success(`Payment successful with reference ${reference}`);
 
       // Extract only book ID and title for each book in the cart
       const booksToAdd = cart.map((book) => ({
-        id: book.id || "",
-        title: book.title || "Unknown Title",
-        numberOfPages: book.numberOfPages || 0,
+        id: book.id || "", // Ensure book ID is defined
+        title: book.title || "Unknown Title", // Fallback for title
+        numberOfPages: book.numberOfPages || 0, // Default to 0 if undefined
       }));
 
       // Merge cart contents (book ID and title) into `boughtBooks` and reset cart in database
       const updatedBoughtBooks = [...boughtBooks, ...booksToAdd];
       await updateDoc(doc(db, "users", user.uid), {
         booksbought: updatedBoughtBooks,
-        currentCart: [],
+        currentCart: [], // Reset cart
       });
 
       // Process each book in the cart
       for (const book of cart) {
-        const bookRef = doc(db, "books", book.id);
+        const bookRef = doc(db, "books", book.id || ""); // Ensure book ID is defined
 
         // Update the book's soldCopies count
         await updateDoc(bookRef, {
@@ -153,7 +155,7 @@ export const CartProvider = ({ children }) => {
         }
 
         // Handle author logic
-        const authorRef = doc(db, "users", book.authorId);
+        const authorRef = doc(db, "users", book.authorId || ""); // Ensure author ID is defined
         const authorDoc = await getDoc(authorRef);
 
         if (authorDoc.exists()) {
@@ -177,11 +179,19 @@ export const CartProvider = ({ children }) => {
 
           // Add the new book details to the array
           const newBookEntry = {
-            id: book.id,
-            title: book.title,
+            bookid: book.id || "", // Ensure book ID is defined
+            id: user.uid, // Use user's ID for consistency
+            title: book.title || "Unknown Title", // Fallback for title
             date: currentDate,
             price: book.price || 0,
+            school: formData.school || "", // Fallback for school
+            studentType: formData.studentType || null, // Fallback to null if undefined
+            name: formData.name || "", // Fallback for name
+            academicYear: formData.academicYear || "", // Fallback for academicYear
+            matricOrLecturerID: formData.matricOrLecturerID || "", // Fallback for ID
+            departmentOrClass: formData.departmentOrClass || "", // Fallback for department
           };
+
           const updatedAuthorBooks = [...currentAuthorBooks, newBookEntry];
 
           await updateDoc(authorRef, {
@@ -222,7 +232,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const payWithWallet = async () => {
+  const payWithWallet = async (formData) => {
     try {
       // Calculate the total price of books in the cart
       const totalCartPrice = cart.reduce(
@@ -255,16 +265,16 @@ export const CartProvider = ({ children }) => {
 
       // Extract only book ID and title for each book in the cart
       const booksToAdd = cart.map((book) => ({
-        id: book.id || "",
-        title: book.title || "Unknown Title",
-        numberOfPages: book.numberOfPages || 0,
+        id: book.id || "", // Ensure book ID is not undefined
+        title: book.title || "Unknown Title", // Provide fallback value for title
+        numberOfPages: book.numberOfPages || 0, // Default to 0 if undefined
       }));
 
       // Merge cart contents into `boughtBooks` and reset the cart in the database
       const updatedBoughtBooks = [...boughtBooks, ...booksToAdd];
       await updateDoc(userRef, {
         booksbought: updatedBoughtBooks,
-        currentCart: [],
+        currentCart: [], // Reset cart
         walletbalance: updatedUserWalletBalance,
       });
 
@@ -314,10 +324,17 @@ export const CartProvider = ({ children }) => {
           const currentDate = new Date().toISOString();
           const currentAuthorBooks = authorDoc.data().booksBoughtByPeople || [];
           const newBookEntry = {
-            id: book.id,
-            title: book.title,
+            bookid: book.id || "", // Ensure book ID is not undefined
+            id: user.uid, // Use user's ID for consistency
+            title: book.title || "Unknown Title", // Provide fallback value for title
             date: currentDate,
             price: book.price || 0,
+            school: formData.school || "", // Ensure formData.school is defined
+            studentType: formData.studentType || null, // Default to null if undefined
+            name: formData.name || "", // Ensure formData.name is defined
+            academicYear: formData.academicYear || "", // Default to empty string if undefined
+            matricOrLecturerID: formData.idNumber || "", // Use formData.idNumber for consistency
+            departmentOrClass: formData.department || "", // Ensure formData.department is defined
           };
 
           const updatedAuthorBooks = [...currentAuthorBooks, newBookEntry];
@@ -382,6 +399,7 @@ export const CartProvider = ({ children }) => {
         componentProps,
         referralCode,
         payWithWallet,
+        onSuccessCallback,
       }}
     >
       {children}

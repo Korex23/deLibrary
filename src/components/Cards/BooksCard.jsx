@@ -27,7 +27,7 @@ const BooksCard = () => {
   const [selectedBook, setSelectedBook] = useState(null);
   const [authors, setAuthors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [entriesPerPage, setEntriesPerPage] = useState(5); // Default entries per page
+  const [entriesPerPage, setEntriesPerPage] = useState(20); // Default entries per page
 
   // Function to fetch author data
   const getAuthor = async (book) => {

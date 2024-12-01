@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import {
   IoHomeOutline,
@@ -16,11 +16,25 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase/config";
 import logo from "../../assets/logo.png";
+import Cart from "../../Cart/Cart";
 
 const Sidebar = () => {
   const { user } = useUser();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthorDropdownOpen, setIsAuthorDropdownOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Change `isScrolled` to true if the page has been scrolled down
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    // Cleanup listener on component unmount
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const toggleDropdown = () => {
     setIsAuthorDropdownOpen((prev) => !prev);
@@ -34,6 +48,11 @@ const Sidebar = () => {
 
   return (
     <>
+      <div
+        className={`absolute top-5 right-5 ${isScrolled ? "z-[-10]" : "z-50"}`}
+      >
+        <UserTopDetails />
+      </div>
       <aside>
         <nav>
           <div>
@@ -251,6 +270,19 @@ const Sidebar = () => {
         <Outlet />
       </aside>
     </>
+  );
+};
+
+const UserTopDetails = () => {
+  const { userDetails } = useUser();
+  return (
+    <div className="flex items-center gap-3 ">
+      <div>
+        <h2 className="text-lg font-semibold">{`${userDetails.firstname} ${userDetails.lastname}`}</h2>
+        {/* <span className="text-gray-500">{userDetails.email}</span> */}
+      </div>
+      <Cart />
+    </div>
   );
 };
 

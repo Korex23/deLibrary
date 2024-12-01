@@ -26,7 +26,7 @@ const Pagination = ({
           }}
           className="px-3 py-2 border rounded-lg bg-white text-gray-700"
         >
-          {[5, 10, 15, 20].map((size) => (
+          {[5, 10, 15, 20, 30, 50].map((size) => (
             <option key={size} value={size}>
               {size}
             </option>
