@@ -1,9 +1,47 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { PaystackButton } from "react-paystack";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  getDoc,
+  doc,
+} from "firebase/firestore";
+import { db } from "../firebase/config";
+import { FaMinus } from "react-icons/fa6";
 
 const Cart = () => {
-  const { cart, getTotalPrice, removeFromCart, componentProps } = useCart();
+  const { cart, getTotalPrice, removeFromCart, componentProps, payWithWallet } =
+    useCart();
+
+  const [authors, setAuthors] = useState({});
+
+  // Function to fetch author data
+  const getAuthor = async (book) => {
+    if (!authors[book.id]) {
+      // Prevent duplicate fetching
+      try {
+        const authorRef = await getDoc(doc(db, "users", book.authorId));
+        if (authorRef.exists()) {
+          const authorData = authorRef.data();
+          setAuthors((prevAuthors) => ({
+            ...prevAuthors,
+            [book.id]: `${authorData.firstname} ${authorData.lastname}`,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching author:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    cart.forEach((book) => {
+      getAuthor(book);
+    });
+  }, [cart]);
 
   return (
     <div className="container mx-auto p-4">
@@ -14,15 +52,15 @@ const Cart = () => {
           </h1>
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col gap-8">
           {/* Cart Items Section */}
-          <div className="flex-grow">
+          <div className="w-[380px]">
             <h1 className="text-2xl font-semibold mb-4">Shopping Cart</h1>
             <div className="space-y-4">
               {cart.map((book) => (
                 <div
                   key={book.id}
-                  className="flex items-center bg-white rounded-lg shadow-md p-4"
+                  className="flex items-center bg-white rounded-lg shadow-md p-4 relative"
                 >
                   {/* Book Image */}
                   <img
@@ -32,31 +70,25 @@ const Cart = () => {
                   />
                   {/* Book Details */}
                   <div className="flex-1 ml-4">
-                    <h2 className="text-lg font-semibold">{book.title}</h2>
-                    <p className="text-gray-600 mt-1">{book.description}</p>
+                    <h2 className="text-lg font-semibold capitalize">
+                      {book.title}
+                    </h2>
                     <span className="text-gray-500">
-                      Categories: {book.categories.join(", ")}
+                      {authors[book.id]
+                        ? `${authors[book.id]}`
+                        : "Loading author..."}
                     </span>
                     <div className="mt-2 flex items-center space-x-4">
                       <span className="text-lg font-semibold">
                         ${book.price}
                       </span>
-                      {/* Quantity Control (Placeholder) */}
-                      <div className="flex items-center space-x-2">
-                        <button className="px-2 py-1 bg-gray-200 rounded-lg">
-                          -
-                        </button>
-                        <span>1</span>{" "}
-                        {/* Replace "1" with quantity if tracking */}
-                        <button className="px-2 py-1 bg-gray-200 rounded-lg">
-                          +
-                        </button>
-                      </div>
+
                       {/* Remove Button */}
                       <button
                         onClick={() => removeFromCart(book.id)}
-                        className="text-red-500 hover:text-red-700 font-semibold"
+                        className="text-red-500 hover:text-red-700 font-semibold absolute top-1 right-2"
                       >
+                        {/* <FaMinus /> */}
                         Remove
                       </button>
                     </div>
@@ -69,21 +101,20 @@ const Cart = () => {
           {/* Order Summary Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg lg:w-1/3">
             <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-700">Subtotal</span>
-              <span className="text-lg font-semibold">${getTotalPrice()}</span>
-            </div>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-700">Shipping</span>
-              <span className="text-lg font-semibold">$5.00</span>{" "}
-              {/* Example fixed shipping */}
-            </div>
-            <hr className="my-2" />
+
             <div className="flex justify-between items-center font-bold text-lg">
               <span>Total</span>
-              <span>${getTotalPrice() + 5}</span>
+              <span>${getTotalPrice()}</span>
             </div>
-            <PaystackButton {...componentProps} />
+            <div className="bg-[#005097] px-3 py-2 text-white w-full text-center rounded-lg mt-4">
+              <PaystackButton {...componentProps} />
+            </div>
+            <button
+              onClick={payWithWallet}
+              className="bg-[#72c6f3] text-white px-3 py-2 mt-2 w-full rounded-lg"
+            >
+              Pay with Wallet
+            </button>
           </div>
         </div>
       )}

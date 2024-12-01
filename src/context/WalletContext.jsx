@@ -20,6 +20,7 @@ export const WalletProvider = ({ children }) => {
   const [amount, setAmount] = useState(0);
   const [depositHistory, setDepositHistory] = useState([]);
   const [user, setUser] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const publicKey = import.meta.env.VITE_PAYSTACK_KEY;
 
@@ -60,15 +61,12 @@ export const WalletProvider = ({ children }) => {
     toast.success(`Payment successful with reference ${reference}`);
     setReference(reference);
 
-    // Fetch the latest user document to get the current wallet balance
     const userDoc = await getDoc(doc(db, "users", user.uid));
     const currentBalance = userDoc.exists() ? userDoc.data().walletbalance : 0;
 
-    // Calculate new balance
     const newBalance = parseFloat(currentBalance) + parseFloat(amount);
     setBalance(newBalance); // Update local balance state
 
-    // Update Firestore with the new balance and deposit history
     await updateDoc(doc(db, "users", user.uid), {
       walletbalance: parseFloat(newBalance),
       depositHistory: [
@@ -81,6 +79,7 @@ export const WalletProvider = ({ children }) => {
         },
       ],
     });
+    setModalOpen(false);
   };
 
   const componentProps = {
@@ -98,7 +97,14 @@ export const WalletProvider = ({ children }) => {
 
   return (
     <WalletContext.Provider
-      value={{ componentProps, balance, setAmount, depositHistory }}
+      value={{
+        componentProps,
+        balance,
+        setAmount,
+        depositHistory,
+        modalOpen,
+        setModalOpen,
+      }}
     >
       {!loading && children}
     </WalletContext.Provider>

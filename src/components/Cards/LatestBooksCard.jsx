@@ -16,7 +16,7 @@ import { toast } from "react-toastify";
 import { useUser } from "../../context/context";
 import Pagination from "../Pagination";
 
-const BooksCard = () => {
+const LatestBooksCard = () => {
   const { allBooks, AddToBookmarks, bookmarks } = useBooks();
   const { cart, addToCart, setReferralCode } = useCart();
   const { userDetails } = useUser();
@@ -26,8 +26,16 @@ const BooksCard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   const [authors, setAuthors] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [entriesPerPage, setEntriesPerPage] = useState(5); // Default entries per page
+
+  function getNewestItems(allBooks) {
+    return allBooks
+      .sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate)) // Sort in descending order
+      .slice(0, 10); // Get the top 10
+  }
+
+  // Example usage
+  const latestBooks = getNewestItems(allBooks);
+  console.log(latestBooks);
 
   // Function to fetch author data
   const getAuthor = async (book) => {
@@ -121,13 +129,10 @@ const BooksCard = () => {
   const isBookBought = (bookId) =>
     userDetails?.booksbought?.some((book) => book.id === bookId) || false;
 
-  const startIndex = (currentPage - 1) * entriesPerPage;
-  const currentBooks = allBooks.slice(startIndex, startIndex + entriesPerPage);
-
   return (
     <div>
       <div className="grid grid-cols-5 gap-9">
-        {currentBooks.map((book) => {
+        {latestBooks.map((book) => {
           const isDisabled = isBookInCart(book.id) || isBookBought(book.id);
 
           return (
@@ -241,17 +246,8 @@ const BooksCard = () => {
           </div>
         )}
       </div>
-      {
-        <Pagination
-          totalEntries={allBooks.length}
-          entriesPerPage={entriesPerPage}
-          setEntriesPerPage={setEntriesPerPage}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-        />
-      }
     </div>
   );
 };
 
-export default BooksCard;
+export default LatestBooksCard;

@@ -10,6 +10,8 @@ import SignInForm from "./components/Forms/SignInForm";
 import BookDetails from "./BooksCatalogue/BookDetails";
 import { ToastContainer } from "react-toastify";
 import ReadABook from "./BooksCatalogue/ReadABook";
+import Bookmarks from "./BooksCatalogue/Bookmarks";
+import AllBooks from "./BooksCatalogue/AllBooks";
 
 const BrowserRouter = createBrowserRouter([
   {
@@ -41,8 +43,16 @@ const BrowserRouter = createBrowserRouter([
         ),
       },
       {
+        path: "bookmarks",
+        element: <Bookmarks />,
+      },
+      {
         path: "wallet",
         element: <Wallet />,
+      },
+      {
+        path: "books",
+        element: <AllBooks />,
       },
     ],
   },
@@ -52,7 +62,7 @@ const BrowserRouter = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <div>Book Catalogue</div>,
+        element: <AllBooks />,
       },
       {
         path: ":bookId",

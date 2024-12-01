@@ -18,7 +18,7 @@ const Wallet = () => {
         <div className="mb-4">
           <h3 className="text-xl font-semibold">Balance:</h3>
           <p className="text-2xl text-green-600">
-            {parseFloat(balance).toFixed(2)} USD
+            &#x20A6; {parseFloat(balance).toFixed(2)}
           </p>
         </div>
 
@@ -28,7 +28,7 @@ const Wallet = () => {
             <thead>
               <tr className="bg-gray-200">
                 <th className="px-4 py-2 text-left font-semibold">
-                  Amount (USD)
+                  Amount (NGN)
                 </th>
                 <th className="px-4 py-2 text-left font-semibold">Date</th>
                 <th className="px-4 py-2 text-left font-semibold">Reference</th>
@@ -38,7 +38,7 @@ const Wallet = () => {
               {depositHistory.length > 0 ? (
                 depositHistory.map((deposit, index) => (
                   <tr key={index} className="border-b">
-                    <td className="px-4 py-2">{deposit.amount} USD</td>
+                    <td className="px-4 py-2"> &#8358; {deposit.amount}</td>
                     <td className="px-4 py-2">{formatDate(deposit.date)}</td>
                     <td className="px-4 py-2">{deposit.reference}</td>
                   </tr>

@@ -1,13 +1,30 @@
 import { useState } from "react";
-import { Link, Outlet, NavLink } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
+import {
+  IoHomeOutline,
+  IoPersonOutline,
+  IoWalletOutline,
+  IoHelpCircleOutline,
+  IoBookmarkOutline,
+  IoLogOutOutline,
+  IoSettingsOutline,
+} from "react-icons/io5";
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { LuStore } from "react-icons/lu";
 import { useUser } from "../../context/context";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase/config";
+import logo from "../../assets/logo.png";
 
 const Sidebar = () => {
   const { user } = useUser();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isAuthorDropdownOpen, setIsAuthorDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsAuthorDropdownOpen((prev) => !prev);
+  };
   const navigate = useNavigate();
 
   const logout = async () => {
@@ -24,7 +41,7 @@ const Sidebar = () => {
               onClick={() => setSidebarOpen(!isSidebarOpen)}
               aria-controls="default-sidebar"
               type="button"
-              className="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+              className="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
             >
               <span className="sr-only">Open sidebar</span>
               <svg
@@ -49,35 +66,184 @@ const Sidebar = () => {
               } sm:translate-x-0`}
               aria-label="Sidebar"
             >
-              <div className="h-full px-4 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
-                <ul className="space-y-8 font-medium relative">
+              <div className="h-full px-4 py-4 overflow-y-auto bg-[#fff]">
+                <div className="flex items-center gap-3">
+                  <img src={logo} alt="birmbook" className="w-10" />
+                  <span className="text-[#005097] font-bold text-xl">
+                    Birmbook
+                  </span>
+                </div>
+                <ul className="space-y-2 font-medium relative mt-8">
                   <li>
-                    <Link to="/dashboard">Dashboard</Link>
+                    <NavLink
+                      to="/dashboard"
+                      end // Add this attribute to prevent activation on nested routes
+                      className={({ isActive }) =>
+                        `flex items-center p-2 rounded-lg ${
+                          isActive
+                            ? "bg-gray-200 text-[#005097]"
+                            : "text-gray-800 hover:bg-gray-100"
+                        }`
+                      }
+                    >
+                      <IoHomeOutline className="inline-block mr-3" />
+                      <span>Dashboard</span>
+                    </NavLink>
                   </li>
                   <li>
-                    <Link to="author">Authors Section</Link>
+                    <div
+                      className="flex items-center p-2 rounded-lg cursor-pointer"
+                      onClick={toggleDropdown}
+                    >
+                      <IoPersonOutline className="inline-block mr-3" />
+                      <span className="flex-grow">Authors Section</span>
+                      {isAuthorDropdownOpen ? (
+                        <FiChevronUp />
+                      ) : (
+                        <FiChevronDown />
+                      )}
+                    </div>
+
+                    {isAuthorDropdownOpen && (
+                      <ul className="ml-6 mt-2 space-y-1">
+                        <li>
+                          <NavLink
+                            to="/dashboard/author/publish"
+                            className={({ isActive }) =>
+                              `flex items-center p-2 rounded-lg ${
+                                isActive
+                                  ? "bg-gray-200 text-[#005097]"
+                                  : "text-gray-800 hover:bg-gray-100"
+                              }`
+                            }
+                          >
+                            <span>Publish a Book</span>
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/dashboard/author/sales-record"
+                            className={({ isActive }) =>
+                              `flex items-center p-2 rounded-lg ${
+                                isActive
+                                  ? "bg-gray-200 text-[#005097]"
+                                  : "text-gray-800 hover:bg-gray-100"
+                              }`
+                            }
+                          >
+                            <span>Sales Record</span>
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/dashboard/author"
+                            className={({ isActive }) =>
+                              `flex items-center p-2 rounded-lg ${
+                                isActive
+                                  ? "bg-gray-200 text-[#005097]"
+                                  : "text-gray-800 hover:bg-gray-100"
+                              }`
+                            }
+                          >
+                            <span>Publishers Dashboard</span>
+                          </NavLink>
+                        </li>
+                      </ul>
+                    )}
                   </li>
+
                   <li>
-                    <Link to="">My Books</Link>
+                    <NavLink
+                      to="/dashboard/bookmarks"
+                      className={({ isActive }) =>
+                        `flex items-center p-2 rounded-lg ${
+                          isActive
+                            ? "bg-gray-200 text-[#005097]"
+                            : "text-gray-800 hover:bg-gray-100"
+                        }`
+                      }
+                    >
+                      <IoBookmarkOutline className="inline-block mr-3" />
+                      <span>Bookmarked Books</span>
+                    </NavLink>
                   </li>
+
                   <li>
-                    <Link to="">Bookmarked Books</Link>
+                    <NavLink
+                      to="/dashboard/books"
+                      className={({ isActive }) =>
+                        `flex items-center p-2 rounded-lg ${
+                          isActive
+                            ? "bg-gray-200 text-[#005097]"
+                            : "text-gray-800 hover:bg-gray-100"
+                        }`
+                      }
+                    >
+                      <LuStore className="inline-block mr-3" />
+                      <span>Book Store</span>
+                    </NavLink>
                   </li>
+
                   <li>
-                    <Link to="">Book Store</Link>
+                    <NavLink
+                      to="/dashboard/faq"
+                      className={({ isActive }) =>
+                        `flex items-center p-2 rounded-lg ${
+                          isActive
+                            ? "bg-gray-200 text-[#005097]"
+                            : "text-gray-800 hover:bg-gray-100"
+                        }`
+                      }
+                    >
+                      <IoHelpCircleOutline className="inline-block mr-3" />
+                      <span>FAQ</span>
+                    </NavLink>
                   </li>
+
                   <li>
-                    <Link to="">FAQ</Link>
+                    <NavLink
+                      to="/dashboard/wallet"
+                      className={({ isActive }) =>
+                        `flex items-center p-2 rounded-lg ${
+                          isActive
+                            ? "bg-gray-200 text-[#005097]"
+                            : "text-gray-800 hover:bg-gray-100"
+                        }`
+                      }
+                    >
+                      <IoWalletOutline className="inline-block mr-3" />
+                      <span>My Wallet</span>
+                    </NavLink>
                   </li>
+
                   <li>
-                    <Link to="wallet">My Wallet</Link>
+                    <NavLink
+                      to="/dashboard/settings"
+                      className={({ isActive }) =>
+                        `flex items-center p-2 rounded-lg ${
+                          isActive
+                            ? "bg-gray-200 text-[#005097]"
+                            : "text-gray-800 hover:bg-gray-100"
+                        }`
+                      }
+                    >
+                      <IoSettingsOutline className="inline-block mr-3" />
+                      <span>Settings</span>
+                    </NavLink>
                   </li>
+
+                  {user && (
+                    <li className="font-medium">
+                      <button
+                        onClick={logout}
+                        className="flex items-center p-2"
+                      >
+                        <IoLogOutOutline className="inline-block mr-3" />
+                        <span>Logout</span>
+                      </button>
+                    </li>
+                  )}
                 </ul>
-                {user && (
-                  <div className="absolute bottom-10 font-medium">
-                    <button onClick={logout}>Logout</button>
-                  </div>
-                )}
               </div>
             </aside>
           </div>

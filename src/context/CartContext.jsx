@@ -9,6 +9,7 @@ import {
   collection,
   query,
   where,
+  runTransaction,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-toastify";
@@ -111,9 +112,9 @@ export const CartProvider = ({ children }) => {
 
       // Extract only book ID and title for each book in the cart
       const booksToAdd = cart.map((book) => ({
-        id: book.id,
-        title: book.title,
-        numberOfPages: book.numberOfPages,
+        id: book.id || "",
+        title: book.title || "Unknown Title",
+        numberOfPages: book.numberOfPages || 0,
       }));
 
       // Merge cart contents (book ID and title) into `boughtBooks` and reset cart in database
@@ -221,6 +222,142 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const payWithWallet = async () => {
+    try {
+      // Calculate the total price of books in the cart
+      const totalCartPrice = cart.reduce(
+        (sum, book) => sum + (book.price || 0),
+        0
+      );
+
+      // Fetch the user's wallet balance
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      if (!userDoc.exists()) {
+        toast.error("User not found.");
+        return;
+      }
+
+      const currentWalletBalance = userDoc.data().walletbalance || 0;
+
+      // Check if the user has sufficient balance
+      if (currentWalletBalance < totalCartPrice) {
+        toast.error("Insufficient wallet balance to complete the purchase.");
+        return;
+      }
+
+      // Deduct the total cart price from the user's wallet balance
+      const updatedUserWalletBalance = currentWalletBalance - totalCartPrice;
+
+      // Show success message
+      toast.success("Payment successful with wallet balance.");
+
+      // Extract only book ID and title for each book in the cart
+      const booksToAdd = cart.map((book) => ({
+        id: book.id || "",
+        title: book.title || "Unknown Title",
+        numberOfPages: book.numberOfPages || 0,
+      }));
+
+      // Merge cart contents into `boughtBooks` and reset the cart in the database
+      const updatedBoughtBooks = [...boughtBooks, ...booksToAdd];
+      await updateDoc(userRef, {
+        booksbought: updatedBoughtBooks,
+        currentCart: [],
+        walletbalance: updatedUserWalletBalance,
+      });
+
+      // Process each book in the cart
+      for (const book of cart) {
+        const bookRef = doc(db, "books", book.id);
+
+        // Update the book's soldCopies count
+        await updateDoc(bookRef, {
+          soldCopies: (book.soldCopies || 0) + 1,
+        });
+
+        // Handle distributor logic
+        if (book.referrer?.id) {
+          const distributorRef = doc(db, "users", book.referrer.id);
+          const distributorDoc = await getDoc(distributorRef);
+
+          if (distributorDoc.exists()) {
+            const currentDistributorBalance =
+              distributorDoc.data().walletbalance || 0;
+            const updatedDistributorBalance =
+              currentDistributorBalance + (book.price || 0) * 0.1;
+
+            await updateDoc(distributorRef, {
+              walletbalance: updatedDistributorBalance,
+            });
+          }
+        }
+
+        // Handle author logic
+        const authorRef = doc(db, "users", book.authorId);
+        const authorDoc = await getDoc(authorRef);
+
+        if (authorDoc.exists()) {
+          const currentAuthorBalance = authorDoc.data().walletbalance || 0;
+          let updatedAuthorBalance;
+
+          // Calculate author's share
+          if (book.referrer?.id) {
+            updatedAuthorBalance =
+              currentAuthorBalance + (book.price || 0) * 0.75;
+          } else {
+            updatedAuthorBalance =
+              currentAuthorBalance + (book.price || 0) * 0.85;
+          }
+
+          const currentDate = new Date().toISOString();
+          const currentAuthorBooks = authorDoc.data().booksBoughtByPeople || [];
+          const newBookEntry = {
+            id: book.id,
+            title: book.title,
+            date: currentDate,
+            price: book.price || 0,
+          };
+
+          const updatedAuthorBooks = [...currentAuthorBooks, newBookEntry];
+
+          await updateDoc(authorRef, {
+            walletbalance: updatedAuthorBalance,
+            booksBoughtByPeople: updatedAuthorBooks,
+          });
+
+          // Handle author's referrer logic
+          const authorReferrerId = authorDoc.data().referredBy;
+          if (authorReferrerId) {
+            const authorReferrerRef = doc(db, "users", authorReferrerId);
+            const referrerDoc = await getDoc(authorReferrerRef);
+
+            if (referrerDoc.exists()) {
+              const currentReferrerBalance =
+                referrerDoc.data().walletbalance || 0;
+              const updatedReferrerBalance =
+                currentReferrerBalance + (book.price || 0) * 0.05;
+
+              await updateDoc(authorReferrerRef, {
+                walletbalance: updatedReferrerBalance,
+              });
+            }
+          }
+        } else {
+          console.error(`Author with ID ${book.authorId} not found.`);
+        }
+      }
+
+      // Update local state
+      setBoughtBooks(updatedBoughtBooks);
+      setCart([]); // Clear local cart
+    } catch (error) {
+      console.error("Error updating books after purchase:", error);
+      toast.error("Error completing the purchase.");
+    }
+  };
+
   const componentProps = {
     email: user?.email,
     amount: getTotalPrice() * 100,
@@ -244,6 +381,7 @@ export const CartProvider = ({ children }) => {
         boughtBooks,
         componentProps,
         referralCode,
+        payWithWallet,
       }}
     >
       {children}

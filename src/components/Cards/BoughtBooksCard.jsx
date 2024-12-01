@@ -8,7 +8,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 
 const BoughtBooksCard = ({ book }) => {
   const { userDetails } = useUser();
-  const { id, frontCoverUrl, title, price, description } = book;
+  const { id, frontCoverUrl, title } = book;
 
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,46 +65,42 @@ const BoughtBooksCard = ({ book }) => {
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md grid grid-cols-5 gap-5">
-      <div>
+      {/* <div>
         <img
           src={frontCoverUrl}
           alt={title}
-          className="h-24 w-24 object-cover rounded-lg"
+          className="h-20 w-20 object-cover rounded-lg"
         />
-      </div>
+      </div> */}
 
       {/* <p className="mt-4 text-lg">
         Average Rating: {averageRating} ({ratings.length} ratings)
       </p> */}
 
       {/* Progress Bar */}
-      <div className="col-span-3">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">{title}</h2>
-        </div>
-        <label className="block text-gray-500">Reading Progress</label>
-        <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-          <div
-            className="bg-[#005097] h-2 rounded-full"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-        <span className="text-gray-500 text-sm mt-1">{`${Math.round(
-          progress
-        )}% Completed`}</span>
+      <div className="col-span-5">
+        <Link to={`/books/read/${id}`}>
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-md font-semibold">{title}</h2>
+          </div>
+          <label className="block text-gray-500 text-xs">
+            Reading Progress
+          </label>
+          <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
+            <div
+              className="bg-[#005097] h-1 rounded-full"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          <span className="text-gray-500 text-xs mt-1">{`${Math.round(
+            progress
+          )}% Completed`}</span>
+        </Link>
       </div>
 
       {/* Error and Loading States */}
       {error && <div className="text-red-500 mt-2">{error}</div>}
       {loading && <div className="text-gray-500">Loading...</div>}
-
-      <div className="flex justify-between mt-4 ml-auto">
-        <Link to={`/books/read/${id}`}>
-          <button className="bg-[#005097] hover:bg-[#72c6f3] text-white py-2 px-4 rounded-lg transition duration-300">
-            Read
-          </button>
-        </Link>
-      </div>
     </div>
   );
 };

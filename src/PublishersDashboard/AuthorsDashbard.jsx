@@ -8,6 +8,7 @@ import Cart from "../Cart/Cart";
 import { Link } from "react-router-dom";
 import BoughtBooksCard from "../components/Cards/BoughtBooksCard";
 import AllBoughtBooks from "../BooksCatalogue/AllBoughtBooks";
+import BookmarkedBooksCard from "../components/Cards/BookmarkedBooksCard";
 
 const AuthorDashboard = () => {
   const { getBookmarkedBooks, getPublishedBooks } = useBooks();
@@ -47,7 +48,6 @@ const AuthorDashboard = () => {
       <div className="col-span-6">
         <div>Author Dashboard</div>
         <BookPublishingForm />
-        <BooksCard />
         <div>
           <h2 className="text-2xl font-bold mb-4">Books Published</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -75,62 +75,6 @@ const AuthorDashboard = () => {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-        <Cart />
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Your Bookmarked Books</h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {bookmarks.length > 0 ? (
-              bookmarks.map((book) => (
-                <div
-                  key={book.id}
-                  className="p-4 bg-white rounded-lg shadow-md flex flex-col"
-                >
-                  <img
-                    src={book.frontCoverUrl}
-                    alt={book.title}
-                    className="h-64 w-full object-cover rounded-lg"
-                  />
-                  <div className="flex justify-between items-center mt-4">
-                    <h2 className="text-xl font-semibold">{book.title}</h2>
-                    <span className="text-gray-500">${book.price}</span>
-                  </div>
-                  <p className="mt-4 text-gray-600">{book.description}</p>
-                  <div className="flex justify-between items-center mt-4">
-                    <span className="text-gray-500">
-                      {book.categories
-                        ? book.categories.join(", ")
-                        : "No categories available"}
-                    </span>
-                  </div>
-
-                  {/* Cart and View buttons */}
-                  <div className="flex justify-between mt-4">
-                    <button
-                      className="flex items-center bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition duration-300"
-                      onClick={() => alert(`Added ${book.title} to Cart`)}
-                    >
-                      <FaShoppingCart className="mr-2" />
-                      Cart
-                    </button>
-
-                    <button
-                      className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition duration-300"
-                      onClick={() => alert(`Viewing ${book.title}`)}
-                    >
-                      View
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p>No bookmarked books yet.</p>
-            )}
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Books Bought</h2>
-            <AllBoughtBooks />
           </div>
         </div>
       </div>
