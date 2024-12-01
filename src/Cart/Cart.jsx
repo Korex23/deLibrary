@@ -21,7 +21,7 @@ const Cart = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [role, setRole] = useState("student"); // Default to student
-  const name = `${userDetails.firstname} ${userDetails.lastname}`;
+  const name = `${userDetails?.firstname || ""} ${userDetails?.lastname || ""}`;
   const [formData, setFormData] = useState({
     school: "",
     name: name,

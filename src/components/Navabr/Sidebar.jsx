@@ -51,7 +51,7 @@ const Sidebar = () => {
       <div
         className={`absolute top-5 right-5 ${isScrolled ? "z-[-10]" : "z-50"}`}
       >
-        <UserTopDetails />
+        <UserTopDetails logout={logout} />
       </div>
       <aside>
         <nav>
@@ -284,8 +284,20 @@ const UserTopDetails = ({ logout }) => {
     <>
       <div className="flex items-center gap-3">
         <div className="flex flex-col cursor-pointer" onClick={toggleDropdown}>
-          <span className="text-lg font-semibold">{`${userDetails.firstname} ${userDetails.lastname}`}</span>
-          <span className="text-gray-500 text-xs">{userDetails.email}</span>
+          {userDetails ? (
+            <>
+              <span className="text-lg font-semibold">
+                {`${userDetails?.firstname || ""} ${
+                  userDetails?.lastname || ""
+                }`}
+              </span>
+              <span className="text-gray-500 text-xs">
+                {userDetails?.email || ""}
+              </span>
+            </>
+          ) : (
+            <div>Loading user details...</div> // Fallback UI while loading user details
+          )}
         </div>
         <Cart />
       </div>

@@ -3,29 +3,27 @@ import { Navigate } from "react-router-dom";
 import { auth } from "./firebase/config";
 
 const PrivateRoute = ({ children }) => {
-  const [loading, setLoading] = useState(true); // To show a loading state while checking auth
-  const [user, setUser] = useState(null); // Track the user's authentication state
+  const [loading, setLoading] = useState(true); // To manage loading state while checking authentication
+  const [user, setUser] = useState(null); // To hold the authenticated user (or null)
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser); // Update user state when auth state changes
-      setLoading(false); // Stop loading once the check is done
+      setUser(currentUser); // Set user state based on authentication status
+      setLoading(false); // Stop loading once the auth state is fetched
     });
 
-    console.log("User state:", user); // Log the user state
-
-    return () => unsubscribe(); // Clean up the listener on component unmount
+    return () => unsubscribe(); // Cleanup the listener on unmount
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Show loading state while checking authentication
+    return <div>Loading...</div>; // Show loading state while the user state is being determined
   }
 
   if (!user) {
-    return <Navigate to="/" />; // If not authenticated, redirect to home or sign-in page
+    return <Navigate to="/" />; // Redirect to login page if no user is authenticated
   }
 
-  return children; // If authenticated, render the protected content
+  return children; // Render the protected content if user is authenticated
 };
 
 export default PrivateRoute;
