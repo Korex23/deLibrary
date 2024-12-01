@@ -1,76 +1,135 @@
-import Onboarding from "./components/Forms/Onboarding";
-import UserSignUpForm from "./components/Forms/UserSignUpForm";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Dashboard from "./CustomerDashboard/Dashboard";
-import ProtectedRoutes from "./ProtectedRoutes";
-import Sidebar from "./components/Navabr/Sidebar";
-import AuthorDashboard from "./PublishersDashboard/AuthorsDashbard";
-import Wallet from "./Wallet/Wallet";
-import SignInForm from "./components/Forms/SignInForm";
-import BookDetails from "./BooksCatalogue/BookDetails";
+import { Suspense, lazy } from "react";
 import { ToastContainer } from "react-toastify";
-import ReadABook from "./BooksCatalogue/ReadABook";
-import Bookmarks from "./BooksCatalogue/Bookmarks";
-import AllBooks from "./BooksCatalogue/AllBooks";
+import "react-toastify/dist/ReactToastify.css";
+import ProtectedRoutes from "./ProtectedRoutes";
+import PrivateRoute from "./PrivateRoutes";
+
+// Lazy load the components
+const UserSignUpForm = lazy(() => import("./components/Forms/UserSignUpForm"));
+const Onboarding = lazy(() => import("./components/Forms/Onboarding"));
+const Dashboard = lazy(() => import("./CustomerDashboard/Dashboard"));
+const Sidebar = lazy(() => import("./components/Navabr/Sidebar"));
+const AuthorDashboard = lazy(() =>
+  import("./PublishersDashboard/AuthorsDashbard")
+);
+const Wallet = lazy(() => import("./Wallet/Wallet"));
+const SignInForm = lazy(() => import("./components/Forms/SignInForm"));
+const BookDetails = lazy(() => import("./BooksCatalogue/BookDetails"));
+const ReadABook = lazy(() => import("./BooksCatalogue/ReadABook"));
+const Bookmarks = lazy(() => import("./BooksCatalogue/Bookmarks"));
+const AllBooks = lazy(() => import("./BooksCatalogue/AllBooks"));
 
 const BrowserRouter = createBrowserRouter([
   {
     path: "/",
-    element: <UserSignUpForm />,
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <UserSignUpForm />
+      </Suspense>
+    ),
   },
   {
     path: "/signin",
-    element: <SignInForm />,
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <SignInForm />
+      </Suspense>
+    ),
   },
   {
     path: "/onboarding",
-    element: <Onboarding />,
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <Onboarding />
+      </Suspense>
+    ),
   },
   {
     path: "/dashboard",
-    element: <Sidebar />,
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <Sidebar />
+      </Suspense>
+    ),
     children: [
       {
         index: true,
-        element: <Dashboard />,
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          </Suspense>
+        ),
       },
       {
         path: "author",
         element: (
-          <ProtectedRoutes>
-            <AuthorDashboard />
-          </ProtectedRoutes>
+          <Suspense fallback={<div>Loading...</div>}>
+            <ProtectedRoutes>
+              <AuthorDashboard />
+            </ProtectedRoutes>
+          </Suspense>
         ),
       },
       {
         path: "bookmarks",
-        element: <Bookmarks />,
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <Bookmarks />
+          </Suspense>
+        ),
       },
       {
         path: "wallet",
-        element: <Wallet />,
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <Wallet />
+          </Suspense>
+        ),
       },
       {
         path: "books",
-        element: <AllBooks />,
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <AllBooks />
+          </Suspense>
+        ),
       },
     ],
   },
   {
     path: "books",
-    element: <Sidebar />,
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <Sidebar />
+      </Suspense>
+    ),
     children: [
       {
         index: true,
-        element: <AllBooks />,
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <AllBooks />
+          </Suspense>
+        ),
       },
       {
         path: ":bookId",
-        element: <BookDetails />,
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <BookDetails />
+          </Suspense>
+        ),
       },
       {
         path: "read/:bookId",
-        element: <ReadABook />,
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <ReadABook />
+          </Suspense>
+        ),
       },
     ],
   },

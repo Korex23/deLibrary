@@ -36,7 +36,9 @@ const Dashboard = () => {
           </div>
           <div className="p-5">
             <div className="rounded-xl p-5 bg-gray-50 shadow-lg">
-              <p className="text-2xl font-bold mb-5">Latest Books</p>
+              <p className="text-2xl font-bold mb-5 text-[#005097]">
+                Latest Books
+              </p>
               <div className="pr-5">
                 <LatestBooksCard />
               </div>
@@ -50,7 +52,9 @@ const Dashboard = () => {
           </div>
           <div className="p-5">
             <div className="rounded-xl p-5 bg-gray-50 shadow-lg">
-              <p className="text-2xl font-bold mb-5">Books For You</p>
+              <p className="text-2xl font-bold mb-5 text-[#005097]">
+                Books For You
+              </p>
               <div className="pr-5">
                 <BooksForYou />
               </div>

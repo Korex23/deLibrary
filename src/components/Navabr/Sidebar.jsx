@@ -273,16 +273,50 @@ const Sidebar = () => {
   );
 };
 
-const UserTopDetails = () => {
+const UserTopDetails = ({ logout }) => {
   const { userDetails } = useUser();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => !prev);
+  };
   return (
-    <div className="flex items-center gap-3 ">
-      <div>
-        <h2 className="text-lg font-semibold">{`${userDetails.firstname} ${userDetails.lastname}`}</h2>
-        {/* <span className="text-gray-500">{userDetails.email}</span> */}
+    <>
+      <div className="flex items-center gap-3">
+        <div className="flex flex-col cursor-pointer" onClick={toggleDropdown}>
+          <span className="text-lg font-semibold">{`${userDetails.firstname} ${userDetails.lastname}`}</span>
+          <span className="text-gray-500 text-xs">{userDetails.email}</span>
+        </div>
+        <Cart />
       </div>
-      <Cart />
-    </div>
+      {isDropdownOpen && (
+        <div className="absolute top-10 right-10 w-40 bg-white rounded-lg shadow-lg p-3 mt-3">
+          <ul className="space-y-2">
+            <li>
+              <NavLink to="/dashboard" className="flex items-center space-x-2">
+                <IoPersonOutline />
+                <span>Profile</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/dashboard/settings"
+                className="flex items-center space-x-2"
+              >
+                <IoSettingsOutline />
+                <span>Settings</span>
+              </NavLink>
+            </li>
+            <li>
+              <button onClick={logout} className="flex items-center space-x-2">
+                <IoLogOutOutline />
+                <span>Logout</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      )}
+    </>
   );
 };
 

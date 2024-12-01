@@ -22,7 +22,9 @@ const AllBoughtBooks = () => {
   return (
     <>
       <div className="rounded-xl p-5 bg-gray-50 shadow-lg w-full">
-        <h3 className="text-xl font-bold mb-4">Continue Reading</h3>
+        <h3 className="text-2xl text-[#005097] font-bold mb-4">
+          Continue Reading
+        </h3>
         <div className="grid grid-cols-4 gap-3">
           {booksBought.slice(0, 4).map((book) => (
             <BoughtBooksCard key={book.id} book={book} />
