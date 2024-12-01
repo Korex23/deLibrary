@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import BoughtBooksCard from "../components/Cards/BoughtBooksCard";
 import AllBoughtBooks from "../BooksCatalogue/AllBoughtBooks";
 import BookmarkedBooksCard from "../components/Cards/BookmarkedBooksCard";
+import SalesRecord from "./SalesRecord";
 
 const AuthorDashboard = () => {
   const { getBookmarkedBooks, getPublishedBooks } = useBooks();
@@ -44,10 +45,11 @@ const AuthorDashboard = () => {
 
   return (
     <div className="flex gap-5">
-      <div className="md:w-64"></div>
+      <div className="md:w-[40%]"></div>
       <div className="col-span-6">
         <div>Author Dashboard</div>
         <BookPublishingForm />
+        <SalesRecord />
         <div>
           <h2 className="text-2xl font-bold mb-4">Books Published</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

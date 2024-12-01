@@ -26,7 +26,7 @@ const BookDetails = () => {
   const navigate = useNavigate();
   const { getABook, currentBook } = useBooks();
   const { userDetails } = useUser();
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState("");
@@ -110,6 +110,8 @@ const BookDetails = () => {
   const shareUrl = window.location.href; // Get the current URL
   const title = currentBook?.title;
 
+  const isBookInCart = cart.some((item) => item.id === currentBook.id);
+
   return (
     <div className="flex gap-5">
       <div className="md:w-64"></div>
@@ -163,7 +165,10 @@ const BookDetails = () => {
             </p>
             <button
               onClick={() => addToCart(currentBook)}
-              className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg flex items-center gap-2 mt-6 w-full md:w-auto"
+              disabled={isBookInCart}
+              className={`bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg flex items-center gap-2 mt-6 w-full md:w-auto ${
+                isBookInCart && "cursor-not-allowed opacity-50"
+              }`}
             >
               <FaShoppingCart />
               Add to Cart
