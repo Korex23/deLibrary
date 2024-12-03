@@ -1,5 +1,5 @@
 import React from "react";
-import AllBoughtBooks from "../BooksCatalogue/AllBoughtBooks";
+import ContinueReading from "../BooksCatalogue/ContinueReading";
 import WalletCard from "../Wallet/DashboardWalletCard";
 import { IoHomeOutline } from "react-icons/io5";
 import { useUser } from "../context/context";
@@ -32,7 +32,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="p-5">
-            <AllBoughtBooks />
+            <ContinueReading />
           </div>
           <div className="p-5">
             <div className="rounded-xl p-5 bg-gray-50 shadow-lg">

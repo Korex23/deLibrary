@@ -4,6 +4,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProtectedRoutes from "./ProtectedRoutes";
 import PrivateRoute from "./PrivateRoutes";
+import Spinner from "./components/Spinner";
 
 // Lazy load the components
 const UserSignUpForm = lazy(() => import("./components/Forms/UserSignUpForm"));
@@ -15,6 +16,7 @@ const AuthorDashboard = lazy(() =>
 );
 const Wallet = lazy(() => import("./Wallet/Wallet"));
 const SignInForm = lazy(() => import("./components/Forms/SignInForm"));
+const ResetPassword = lazy(() => import("./components/Forms/ResetPassword"));
 const BookDetails = lazy(() => import("./BooksCatalogue/BookDetails"));
 const ReadABook = lazy(() => import("./BooksCatalogue/ReadABook"));
 const Bookmarks = lazy(() => import("./BooksCatalogue/Bookmarks"));
@@ -24,7 +26,7 @@ const BrowserRouter = createBrowserRouter([
   {
     path: "/",
     element: (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<Spinner />}>
         <UserSignUpForm />
       </Suspense>
     ),
@@ -32,15 +34,23 @@ const BrowserRouter = createBrowserRouter([
   {
     path: "/signin",
     element: (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<Spinner />}>
         <SignInForm />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/reset-password",
+    element: (
+      <Suspense fallback={<Spinner />}>
+        <ResetPassword />
       </Suspense>
     ),
   },
   {
     path: "/onboarding",
     element: (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<Spinner />}>
         <Onboarding />
       </Suspense>
     ),
@@ -48,7 +58,7 @@ const BrowserRouter = createBrowserRouter([
   {
     path: "/dashboard",
     element: (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<Spinner />}>
         <Sidebar />
       </Suspense>
     ),
@@ -56,7 +66,7 @@ const BrowserRouter = createBrowserRouter([
       {
         index: true,
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Spinner />}>
             <PrivateRoute>
               <Dashboard />
             </PrivateRoute>
@@ -66,7 +76,7 @@ const BrowserRouter = createBrowserRouter([
       {
         path: "author",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Spinner />}>
             <ProtectedRoutes>
               <AuthorDashboard />
             </ProtectedRoutes>
@@ -76,7 +86,7 @@ const BrowserRouter = createBrowserRouter([
       {
         path: "bookmarks",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Spinner />}>
             <Bookmarks />
           </Suspense>
         ),
@@ -84,7 +94,7 @@ const BrowserRouter = createBrowserRouter([
       {
         path: "wallet",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Spinner />}>
             <Wallet />
           </Suspense>
         ),
@@ -92,7 +102,15 @@ const BrowserRouter = createBrowserRouter([
       {
         path: "books",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Spinner />}>
+            <AllBooks />
+          </Suspense>
+        ),
+      },
+      {
+        path: "mybooks",
+        element: (
+          <Suspense fallback={<Spinner />}>
             <AllBooks />
           </Suspense>
         ),
@@ -102,7 +120,7 @@ const BrowserRouter = createBrowserRouter([
   {
     path: "books",
     element: (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<Spinner />}>
         <Sidebar />
       </Suspense>
     ),
@@ -110,7 +128,7 @@ const BrowserRouter = createBrowserRouter([
       {
         index: true,
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Spinner />}>
             <AllBooks />
           </Suspense>
         ),
@@ -118,7 +136,7 @@ const BrowserRouter = createBrowserRouter([
       {
         path: ":bookId",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Spinner />}>
             <BookDetails />
           </Suspense>
         ),
@@ -126,12 +144,16 @@ const BrowserRouter = createBrowserRouter([
       {
         path: "read/:bookId",
         element: (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Spinner />}>
             <ReadABook />
           </Suspense>
         ),
       },
     ],
+  },
+  {
+    path: "spinner",
+    element: <Spinner />,
   },
 ]);
 

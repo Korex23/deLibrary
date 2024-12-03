@@ -7,7 +7,7 @@ import { FaShoppingCart } from "react-icons/fa";
 import Cart from "../Cart/Cart";
 import { Link } from "react-router-dom";
 import BoughtBooksCard from "../components/Cards/BoughtBooksCard";
-import AllBoughtBooks from "../BooksCatalogue/AllBoughtBooks";
+import AllBoughtBooks from "../BooksCatalogue/ContinueReading";
 import BookmarkedBooksCard from "../components/Cards/BookmarkedBooksCard";
 import SalesRecord from "./SalesRecord";
 

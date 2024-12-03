@@ -32,3 +32,24 @@ body h5,
 body h6 {
   font-family: "Nunito", sans-serif;
 } */
+
+@keyframes loading_spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg); /* Smooth 360-degree rotation */
+  }
+}
+
+.loading_logo {
+  animation: loading_spin 3s linear infinite; /* Shorter duration for more dynamic spin */
+  transform-style: preserve-3d; /* Maintain 3D transformation effect */
+  perspective: 1000px; /* Add depth */
+  display: inline-block; /* Adjusts better with inline elements */
+}
+
+/* Optional: Add a shadow for depth */
+.loading_logo img {
+  filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.3));
+}

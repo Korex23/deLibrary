@@ -8,6 +8,7 @@ import {
   IoBookmarkOutline,
   IoLogOutOutline,
   IoSettingsOutline,
+  IoBookOutline,
 } from "react-icons/io5";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { LuStore } from "react-icons/lu";
@@ -200,6 +201,21 @@ const Sidebar = () => {
                     >
                       <LuStore className="inline-block mr-3" />
                       <span>Book Store</span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/dashboard/mybooks"
+                      className={({ isActive }) =>
+                        `flex items-center p-2 rounded-lg ${
+                          isActive
+                            ? "bg-gray-200 text-[#005097]"
+                            : "text-gray-800 hover:bg-gray-100"
+                        }`
+                      }
+                    >
+                      <IoBookOutline className="inline-block mr-3" />
+                      <span>My Books</span>
                     </NavLink>
                   </li>
 

@@ -267,7 +267,7 @@ export const CartProvider = ({ children }) => {
       const booksToAdd = cart.map((book) => ({
         id: book.id || "", // Ensure book ID is not undefined
         title: book.title || "Unknown Title", // Provide fallback value for title
-        numberOfPages: book.numberOfPages || 0, // Default to 0 if undefined
+        numberOfPages: book.numberOfPages, // Default to 0 if undefined
       }));
 
       // Merge cart contents into `boughtBooks` and reset the cart in the database

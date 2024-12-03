@@ -4,7 +4,7 @@ import { useUser } from "../context/context";
 import BoughtBooksCard from "../components/Cards/BoughtBooksCard";
 import { Link } from "react-router-dom";
 
-const AllBoughtBooks = () => {
+const ContinueReading = () => {
   const { getBoughtBooks } = useBooks();
   const [booksBought, setBooksBought] = useState([]);
   const { user } = useUser();
@@ -31,7 +31,7 @@ const AllBoughtBooks = () => {
           ))}
         </div>
         <div className="mt-5">
-          <Link to="/bought-books" className="text-[#005097]">
+          <Link to="/mybooks" className="text-[#005097]">
             View all
           </Link>
         </div>
@@ -40,4 +40,4 @@ const AllBoughtBooks = () => {
   );
 };
 
-export default AllBoughtBooks;
+export default ContinueReading;
