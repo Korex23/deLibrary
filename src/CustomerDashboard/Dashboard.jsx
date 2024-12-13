@@ -14,15 +14,17 @@ const Dashboard = () => {
       <div className="flex gap-5">
         <div className="md:w-72"></div>
         <div className="w-full mt-16 bg-[#f5f5f5]">
-          <div className="grid grid-cols-2">
+          <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="p-5">
               <div className="flex gap-2 mt-2 mb-5">
                 <IoHomeOutline size={20} className="text-[#005097]" />
                 <span className="text-[#005097]">Dashboard</span>
               </div>
               <div className="flex gap-2 items-center">
-                <h1 className="text-3xl font-bold">Welcome,</h1>
-                <h2 className="text-3xl font-bold text-[#005097]">
+                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
+                  Welcome,
+                </h1>
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#005097]">
                   {`${userDetails.firstname} ${userDetails.lastname}` || "User"}
                 </h2>
               </div>

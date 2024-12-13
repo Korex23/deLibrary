@@ -62,7 +62,7 @@ const BookmarkedBooksCard = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-5 gap-9">
+      <div className="grid grid-cols-1 place-items-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-9">
         {currentBookmarks.length > 0 ? (
           currentBookmarks.map((book) => (
             <div

@@ -8,18 +8,18 @@ const WalletCard = () => {
   const [showModal, setShowModal] = useState(false);
 
   return (
-    <div className="bg-gray-100 p-6">
+    <div className="bg-gray-100 p-4 md:p-6">
       {/* Wallet Balance Card */}
-      <div className="bg-[#00509730] shadow-lg rounded-lg p-4 w-[400px] max-w-md flex items-center justify-between">
+      <div className="bg-[#00509730] shadow-lg rounded-lg p-4 md:w-[400px] max-w-md flex items-center justify-between gap-8 md:gap-0">
         <div>
-          <p className="text-3xl text-[#005097] font-semibold">
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-[#005097] font-semibold">
             ₦ {parseFloat(balance).toFixed(2)}
           </p>
-          <h2 className="text-md mb-4">Wallet Balance</h2>
+          <h2 className="text-sm md:text-md mb-4">Wallet Balance</h2>
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="mt-6 bg-[#005097] text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition ease-in-out duration-300"
+          className="mt-6 bg-[#005097] text-white text-sm md:text-md py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition ease-in-out duration-300"
         >
           Refill Wallet
         </button>

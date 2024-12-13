@@ -27,9 +27,8 @@ const BooksCard = () => {
   const [selectedBook, setSelectedBook] = useState(null);
   const [authors, setAuthors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [entriesPerPage, setEntriesPerPage] = useState(20); // Default entries per page
+  const [entriesPerPage, setEntriesPerPage] = useState(20);
 
-  // Function to fetch author data
   const getAuthor = async (book) => {
     if (!authors[book.id]) {
       // Prevent duplicate fetching
@@ -126,7 +125,7 @@ const BooksCard = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-5 gap-9">
+      <div className="grid grid-cols-1 place-items-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-9">
         {currentBooks.map((book) => {
           const isDisabled = isBookInCart(book.id) || isBookBought(book.id);
 

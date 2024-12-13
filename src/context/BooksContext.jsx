@@ -53,6 +53,7 @@ export const BooksProvider = ({ children }) => {
     reviews: [],
     allowedDistributors: [], // New property
     isDistributorsAllowed: false, // New property
+    questions_answers: [],
   });
   const [allBooks, setAllBooks] = useState([]);
   const [user, setUser] = useState(null);

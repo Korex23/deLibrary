@@ -8,7 +8,7 @@ const AllBooks = () => {
     <>
       <div className="flex gap-5">
         <div className="md:w-64"></div>
-        <div className="col-span-6 p-5">
+        <div className="col-span-6 p-5 mt-16">
           <div className="rounded-xl p-5 bg-gray-50 shadow-lg">
             <p className="text-3xl font-bold mb-5">Latest Books</p>
             <BooksCard />

@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ProtectedRoutes from "./ProtectedRoutes";
 import PrivateRoute from "./PrivateRoutes";
 import Spinner from "./components/Spinner";
+import MyBoughtBooks from "./BooksCatalogue/MyBoughtBooks";
 
 // Lazy load the components
 const UserSignUpForm = lazy(() => import("./components/Forms/UserSignUpForm"));
@@ -111,7 +112,7 @@ const BrowserRouter = createBrowserRouter([
         path: "mybooks",
         element: (
           <Suspense fallback={<Spinner />}>
-            <AllBooks />
+            <MyBoughtBooks />
           </Suspense>
         ),
       },
@@ -150,10 +151,6 @@ const BrowserRouter = createBrowserRouter([
         ),
       },
     ],
-  },
-  {
-    path: "spinner",
-    element: <Spinner />,
   },
 ]);
 

@@ -85,9 +85,9 @@ const BookPublishingForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 p-8 bg-white rounded-lg shadow-lg max-w-2xl mx-auto"
+      className="space-y-6 p-8 bg-gray-50 rounded-lg shadow-lg max-w-2xl mx-auto h-[100vh] overflow-y-auto"
     >
-      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+      <h2 className="text-3xl font-bold mb-6 text-center text-[#005097]">
         Book Publishing Form
       </h2>
 
@@ -303,6 +303,69 @@ const BookPublishingForm = () => {
           {errors.pdf && <p className="text-red-500 text-sm">{errors.pdf}</p>}
         </div>
       </div>
+      <h3 className="text-xl font-semibold text-gray-800 mt-6">
+        Distribution Settings
+      </h3>
+      <div className="flex gap-6 items-center">
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            checked={anyone}
+            onChange={() => {
+              setAnyone(true);
+              setOnlyMe(false);
+              updateBookInfoWithDistributors([]);
+            }}
+            className="h-5 w-5 text-blue-500 border-gray-300 rounded"
+          />
+          <span className="ml-2 text-gray-700">Anyone</span>
+        </label>
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            checked={onlyMe}
+            onChange={() => {
+              setOnlyMe(true);
+              setAnyone(false);
+              updateBookInfoWithDistributors([]);
+            }}
+            className="h-5 w-5 text-blue-500 border-gray-300 rounded"
+          />
+          <span className="ml-2 text-gray-700">Only Me</span>
+        </label>
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            checked={!onlyMe && !anyone}
+            onChange={() => {
+              setAnyone(false);
+              setOnlyMe(false);
+              updateBookInfoWithDistributors([]);
+            }}
+            className="h-5 w-5 text-blue-500 border-gray-300 rounded"
+          />
+          <span className="ml-2 text-gray-700">Custom Distributors</span>
+        </label>
+      </div>
+      {/* Select Distributors */}
+      {!(onlyMe || anyone) && (
+        <div className="mt-4">
+          <label
+            htmlFor="distributors"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Select Distributors
+          </label>
+          <Select
+            isMulti
+            options={users}
+            value={bookInfo.allowedDistributors}
+            onChange={handleDistributorChange}
+            placeholder="Select distributors"
+            className="w-full p-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ease-in-out duration-300"
+          />
+        </div>
+      )}
 
       {/* Submit Button */}
       <button
