@@ -14,6 +14,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import logo from "../../assets/logo.png";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
+import { ref } from "firebase/storage";
 
 const UserSignUpForm = () => {
   const navigate = useNavigate();
@@ -92,12 +93,28 @@ const UserSignUpForm = () => {
 
       await setDoc(doc(db, "users", user.uid), {
         id: user.uid,
-        ...formData,
+        firstname: formData.firstname,
+        lastname: formData.lastname,
+        email: formData.email,
+        username: formData.username,
         profilePic: profilePicUrl,
         walletbalance: 0,
         booksbought: [],
         bookspublished: [],
         booksbookmarked: [],
+        accountOpened: new Date().toISOString(),
+        currentCart: [],
+        depositHistory: [],
+        withdrawalHistory: [],
+        isAuthor: false,
+        isCustomer: false,
+        isReferred: false,
+        referredBy: "",
+        referredUsers: [],
+        myDistributors: [],
+        booksIcanShare: [],
+        referralCode: formData.username,
+        referrer: "",
       });
 
       setFormData({

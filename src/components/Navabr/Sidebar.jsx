@@ -9,6 +9,7 @@ import {
   IoLogOutOutline,
   IoSettingsOutline,
   IoBookOutline,
+  IoPeopleOutline,
 } from "react-icons/io5";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { LuStore } from "react-icons/lu";
@@ -23,6 +24,7 @@ const Sidebar = () => {
   const { user } = useUser();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthorDropdownOpen, setIsAuthorDropdownOpen] = useState(false);
+  const [isReferralDropdownOpen, setIsReferralDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -39,6 +41,9 @@ const Sidebar = () => {
 
   const toggleDropdown = () => {
     setIsAuthorDropdownOpen((prev) => !prev);
+  };
+  const toggleReferralDropdown = () => {
+    setIsReferralDropdownOpen((prev) => !prev);
   };
   const navigate = useNavigate();
 
@@ -251,6 +256,53 @@ const Sidebar = () => {
                     </NavLink>
                   </li>
 
+                  <li>
+                    <div
+                      className="flex items-center p-2 rounded-lg cursor-pointer"
+                      onClick={toggleReferralDropdown}
+                    >
+                      <IoPeopleOutline className="inline-block mr-3" />
+                      <span>Refferals & Distributors</span>
+                      {isReferralDropdownOpen ? (
+                        <FiChevronUp />
+                      ) : (
+                        <FiChevronDown />
+                      )}
+                    </div>
+
+                    {isReferralDropdownOpen && (
+                      <ul className="ml-6 mt-2 space-y-1">
+                        <li>
+                          <NavLink
+                            to="/dashboard/referrals"
+                            className={({ isActive }) =>
+                              `flex items-center p-2 rounded-lg ${
+                                isActive
+                                  ? "bg-gray-200 text-[#005097]"
+                                  : "text-gray-800 hover:bg-gray-100"
+                              }`
+                            }
+                          >
+                            <span>Refferal Statistics</span>
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/dashboard/distributors"
+                            className={({ isActive }) =>
+                              `flex items-center p-2 rounded-lg ${
+                                isActive
+                                  ? "bg-gray-200 text-[#005097]"
+                                  : "text-gray-800 hover:bg-gray-100"
+                              }`
+                            }
+                          >
+                            <span>Distributors Statistics</span>
+                          </NavLink>
+                        </li>
+                      </ul>
+                    )}
+                  </li>
                   <li>
                     <NavLink
                       to="/dashboard/settings"

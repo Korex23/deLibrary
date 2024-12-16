@@ -2,10 +2,13 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ProtectedRoutes from "./ProtectedRoutes";
-import PrivateRoute from "./PrivateRoutes";
+// import ProtectedRoutes from "./ProtectedRoutes";
+import ProtectedRoutes from "./PrivateRoutes";
 import Spinner from "./components/Spinner";
 import MyBoughtBooks from "./BooksCatalogue/MyBoughtBooks";
+import Distributors from "./Refferals/Distributors";
+import Refferals from "./Refferals/Refferals";
+import PrivateRoute from "./ProtectedRoutes";
 
 // Lazy load the components
 const UserSignUpForm = lazy(() => import("./components/Forms/UserSignUpForm"));
@@ -22,6 +25,7 @@ const BookDetails = lazy(() => import("./BooksCatalogue/BookDetails"));
 const ReadABook = lazy(() => import("./BooksCatalogue/ReadABook"));
 const Bookmarks = lazy(() => import("./BooksCatalogue/Bookmarks"));
 const AllBooks = lazy(() => import("./BooksCatalogue/AllBooks"));
+const Settings = lazy(() => import("../src/Settings/Settings"));
 
 const BrowserRouter = createBrowserRouter([
   {
@@ -113,6 +117,30 @@ const BrowserRouter = createBrowserRouter([
         element: (
           <Suspense fallback={<Spinner />}>
             <MyBoughtBooks />
+          </Suspense>
+        ),
+      },
+      {
+        path: "settings",
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <Settings />
+          </Suspense>
+        ),
+      },
+      {
+        path: "distributors",
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <Distributors />
+          </Suspense>
+        ),
+      },
+      {
+        path: "referrals",
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <Refferals />
           </Suspense>
         ),
       },

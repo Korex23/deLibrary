@@ -69,7 +69,7 @@ export const CartProvider = ({ children }) => {
       // Update cart state
       setCart(newCart);
       setReferralCode("");
-
+      ``;
       // Persist cart in Firestore
       await updateDoc(doc(db, "users", user.uid), {
         currentCart: newCart,
@@ -117,6 +117,7 @@ export const CartProvider = ({ children }) => {
         id: book.id || "", // Ensure book ID is defined
         title: book.title || "Unknown Title", // Fallback for title
         numberOfPages: book.numberOfPages || 0, // Default to 0 if undefined
+        currentPage: 1,
       }));
 
       // Merge cart contents (book ID and title) into `boughtBooks` and reset cart in database
@@ -148,8 +149,24 @@ export const CartProvider = ({ children }) => {
             const updatedDistributorBalance =
               currentDistributorBalance + (book.price || 0) * 0.1;
 
+            const bookId = book.id; // ID of the book being sold
+
+            const distributorData = distributorDoc.data();
+            const updatedBooksIcanShare = distributorData.booksIcanShare.map(
+              (bookItem) => {
+                if (bookItem.id === bookId) {
+                  return {
+                    ...bookItem,
+                    copiesSold: (bookItem.copiesSold || 0) + 1, // Increment copiesSold by 1
+                  };
+                }
+                return bookItem; // Keep other books unchanged
+              }
+            );
+
             await updateDoc(distributorRef, {
               walletbalance: updatedDistributorBalance,
+              booksIcanShare: updatedBooksIcanShare,
             });
           }
         }
@@ -200,21 +217,36 @@ export const CartProvider = ({ children }) => {
           });
 
           // Handle author's referrer (if exists)
-          const authorReferrerId = authorDoc.data().referredBy;
+          const authorReferrerId = authorDoc.data().referrer;
           if (authorReferrerId) {
             const authorReferrerRef = doc(db, "users", authorReferrerId);
             const referrerDoc = await getDoc(authorReferrerRef);
+
+            console.log("Author referrer doc:", referrerDoc.data());
 
             if (referrerDoc.exists()) {
               const currentReferrerBalance =
                 referrerDoc.data().walletbalance || 0;
 
+              const updatedReferredUser = referrerDoc
+                .data()
+                .referredUsers.map((user) => {
+                  if (user.id === authorReferrerId) {
+                    return {
+                      ...user,
+                      amountGenerated:
+                        (user.amountGenerated || 0) + book.price * 0.05,
+                    };
+                  }
+                  return user; // Keep other books unchanged
+                });
               // Update author's referrer's wallet balance
               const updatedReferrerBalance =
                 currentReferrerBalance + (book.price || 0) * 0.05;
 
               await updateDoc(authorReferrerRef, {
                 walletbalance: updatedReferrerBalance,
+                referredUsers: updatedReferredUser,
               });
             }
           }
@@ -268,6 +300,7 @@ export const CartProvider = ({ children }) => {
         id: book.id || "", // Ensure book ID is not undefined
         title: book.title || "Unknown Title", // Provide fallback value for title
         numberOfPages: book.numberOfPages, // Default to 0 if undefined
+        currentPage: 1,
       }));
 
       // Merge cart contents into `boughtBooks` and reset the cart in the database
@@ -295,11 +328,29 @@ export const CartProvider = ({ children }) => {
           if (distributorDoc.exists()) {
             const currentDistributorBalance =
               distributorDoc.data().walletbalance || 0;
+
+            // Update distributor's wallet balance
             const updatedDistributorBalance =
               currentDistributorBalance + (book.price || 0) * 0.1;
 
+            const bookId = book.id; // ID of the book being sold
+
+            const distributorData = distributorDoc.data();
+            const updatedBooksIcanShare = distributorData.booksIcanShare.map(
+              (bookItem) => {
+                if (bookItem.id === bookId) {
+                  return {
+                    ...bookItem,
+                    copiesSold: (bookItem.copiesSold || 0) + 1, // Increment copiesSold by 1
+                  };
+                }
+                return bookItem; // Keep other books unchanged
+              }
+            );
+
             await updateDoc(distributorRef, {
               walletbalance: updatedDistributorBalance,
+              booksIcanShare: updatedBooksIcanShare,
             });
           }
         }
@@ -345,10 +396,12 @@ export const CartProvider = ({ children }) => {
           });
 
           // Handle author's referrer logic
-          const authorReferrerId = authorDoc.data().referredBy;
+          const authorReferrerId = authorDoc.data().referrer;
           if (authorReferrerId) {
             const authorReferrerRef = doc(db, "users", authorReferrerId);
             const referrerDoc = await getDoc(authorReferrerRef);
+
+            console.log("Author referrer doc:", referrerDoc.data());
 
             if (referrerDoc.exists()) {
               const currentReferrerBalance =
@@ -356,8 +409,32 @@ export const CartProvider = ({ children }) => {
               const updatedReferrerBalance =
                 currentReferrerBalance + (book.price || 0) * 0.05;
 
+              console.log(
+                "Original referredUsers:",
+                referrerDoc.data().referredUsers
+              );
+
+              const updatedReferredUser = referrerDoc
+                .data()
+                .referredUsers.map((user) => {
+                  if (user.id === authorReferrerId) {
+                    console.log(
+                      `Updating user ${user.id} with generated amount.`
+                    );
+                    return {
+                      ...user,
+                      amountGenerated:
+                        (user.amountGenerated || 0) + book.price * 0.05,
+                    };
+                  }
+                  return user; // Keep other users unchanged
+                });
+
+              console.log("Updated referredUsers:", updatedReferredUser);
+
               await updateDoc(authorReferrerRef, {
                 walletbalance: updatedReferrerBalance,
+                referredUsers: updatedReferredUser,
               });
             }
           }

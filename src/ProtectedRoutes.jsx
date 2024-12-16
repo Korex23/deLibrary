@@ -1,70 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { auth, db } from "./firebase/config";
-import { getDoc, doc } from "firebase/firestore";
+import { auth } from "./firebase/config";
 
-const ProtectedRoutes = ({ children }) => {
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(false);
-  const [isAuthor, setIsAuthor] = useState(false);
+const PrivateRoute = ({ children }) => {
+  const [loading, setLoading] = useState(true); // To manage loading state while checking authentication
+  const [user, setUser] = useState(null); // To hold the authenticated user (or null)
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async () => {
-      const currentUser = auth.currentUser;
-      
-      console.log("Auth state changed:", currentUser); // Log auth state change
-      setLoading(true);
-
-      if (currentUser) {
-        console.log("Authenticated user:", currentUser.uid);
-        // User is authenticated, proceed to fetch their document
-        try {
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          console.log("User document fetched:", userDoc);
-
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            console.log("User data:", userData);
-            setUser(true);
-            setIsAuthor(userData.isAuthor === true);
-          } else {
-            console.error("No such user document!");
-            setUser(false);
-            setIsAuthor(false);
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          setUser(false);
-          setIsAuthor(false);
-        }
-      } else {
-        console.log("No user is logged in.");
-        setUser(false);
-        setIsAuthor(false);
-      }
-      setLoading(false); // Stop loading after state updates
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser); // Set user state based on authentication status
+      setLoading(false); // Stop loading once the auth state is fetched
     });
 
-    return () => unsubscribe();
+    return () => unsubscribe(); // Cleanup the listener on unmount
   }, []);
 
   if (loading) {
-    console.log("Loading...");
-    return <div>Loading...</div>;
+    return <div>Loading...</div>; // Show loading state while the user state is being determined
   }
 
   if (!user) {
-    console.log("No authenticated user, redirecting to /signin.");
-    return <Navigate to="/signin" />;
+    return <Navigate to="/" />; // Redirect to login page if no user is authenticated
   }
 
-  if (!isAuthor) {
-    console.log("User is not an author, redirecting to /dashboard.");
-    return <Navigate to="/dashboard" />;
-  }
-
-  console.log("Protected route allowed.");
-  return children;
+  return children; // Render the protected content if user is authenticated
 };
 
-export default ProtectedRoutes;
+export default PrivateRoute;

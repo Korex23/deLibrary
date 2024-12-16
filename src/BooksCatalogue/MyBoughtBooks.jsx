@@ -37,18 +37,24 @@ const MyBoughtBooks = () => {
         <div className="md:w-64"></div>
         <div className="col-span-6 p-5 mt-16">
           <div className="flex flex-col space-y-5">
-            {getSlicedBooks().map((book) => {
-              return <MyBoughtBooksCard key={book.id} book={book} />;
-            })}
+            {booksBought.length > 0 ? (
+              getSlicedBooks().map((book) => {
+                return <MyBoughtBooksCard key={book.id} book={book} />;
+              })
+            ) : (
+              <p>No books bought</p>
+            )}
           </div>
 
-          <Pagination
-            entriesPerPage={entriesPerPage}
-            totalEntries={totalEntries}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            setEntriesPerPage={setEntriesPerPage}
-          />
+          {booksBought.length > 0 ? (
+            <Pagination
+              entriesPerPage={entriesPerPage}
+              totalEntries={totalEntries}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              setEntriesPerPage={setEntriesPerPage}
+            />
+          ) : null}
           <div className="mt-8">
             <div className="rounded-xl p-5 bg-gray-50 shadow-lg">
               <p className="text-2xl font-bold mb-5">Books For You</p>

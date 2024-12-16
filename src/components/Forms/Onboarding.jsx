@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const Onboarding = () => {
-  const { user } = useUser(); // Access current user
+  const { user, userDetails } = useUser(); // Access current user
   const navigate = useNavigate();
   const [openModal, setOpenModal] = useState(false);
   const [referralCode, setReferralCode] = useState("");
@@ -25,9 +25,9 @@ const Onboarding = () => {
   useEffect(() => {
     const fetchData = async () => {
       const querySnapshot = await getDocs(collection(db, "users"));
-      querySnapshot.forEach((doc) => {
-        console.log(doc.id, " => ", doc.data());
-      });
+      // querySnapshot.forEach((doc) => {
+      //   console.log(doc.id, " => ", doc.data());
+      // });
     };
 
     fetchData();
@@ -67,6 +67,7 @@ const Onboarding = () => {
           name: `${referrerDoc.data().firstname} ${
             referrerDoc.data().lastname
           }`,
+          referredUsers: referrerDoc.data().referredUsers || [], // Ensure referredAuthors is initialized
         };
       }
 
@@ -81,6 +82,21 @@ const Onboarding = () => {
         }),
       });
 
+      // Update referrer's referredAuthors list, ensuring it's initialized as an array
+
+      if (referrerData) {
+        await updateDoc(doc(db, "users", referrerData.id), {
+          referredUsers: [
+            ...referrerData.referredUsers,
+            {
+              id: user.uid,
+              name: `${userDetails.firstname} ${userDetails.lastname}`,
+              amountGenerated: 0,
+            },
+          ],
+        });
+      }
+
       if (referrerData) {
         toast.success(`You've been referred by ${referrerData.name}.`);
       } else {
@@ -91,6 +107,7 @@ const Onboarding = () => {
       navigate("/dashboard");
     } catch (error) {
       toast.error("Invalid referral code. Please try again.");
+      console.log(error);
     } finally {
       setLoading(false);
     }

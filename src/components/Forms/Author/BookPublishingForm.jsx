@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { useBooks } from "../../../context/BooksContext";
+import { useUser } from "../../../context/context";
+import { updateDoc, doc, getDoc, arrayUnion } from "firebase/firestore";
+import { db } from "../../../firebase/config";
 import Select from "react-select";
 
 const BookPublishingForm = () => {
@@ -16,9 +19,12 @@ const BookPublishingForm = () => {
     setAnyone,
     updateBookInfoWithDistributors,
   } = useBooks();
+  const { user } = useUser();
 
   const [uploading, setUploading] = useState(false);
-  const [errors, setErrors] = useState({}); // State for validation errors
+  const [myDistributors, setMyDistributors] = useState([]);
+
+  const [errors, setErrors] = useState({});
 
   const validateForm = () => {
     const newErrors = {};
@@ -55,6 +61,61 @@ const BookPublishingForm = () => {
       await updateAllBooks();
       await updateBooks();
 
+      // Update the user's myDistributors array
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userData = userDoc.data();
+      if (userData.myDistributors) {
+        setMyDistributors(userData.myDistributors);
+      }
+
+      await updateDoc(doc(db, "users", user.uid), {
+        myDistributors: [...myDistributors, ...bookInfo.allowedDistributors],
+      });
+
+      for (const distributor of bookInfo.allowedDistributors) {
+        try {
+          console.log("Processing distributor:", distributor.value);
+          console.log(bookInfo.title, bookInfo.id);
+
+          const distributorDocRef = doc(db, "users", distributor.value);
+          const distributorDoc = await getDoc(distributorDocRef);
+
+          if (!bookInfo.title || !bookInfo.id) {
+            console.error("Missing required fields: title or id");
+            continue; // Skip this distributor
+          }
+
+          if (distributorDoc.exists()) {
+            const distributorData = distributorDoc.data();
+
+            if (distributorData.booksIcanShare) {
+              await updateDoc(distributorDocRef, {
+                booksIcanShare: arrayUnion({
+                  title: bookInfo.title,
+                  id: bookInfo.id,
+                  copiesSold: 0,
+                }),
+              });
+            } else {
+              await updateDoc(distributorDocRef, {
+                booksIcanShare: [
+                  { title: bookInfo.title, id: bookInfo.id, copiesSold: 0 },
+                ],
+              });
+            }
+          } else {
+            console.error(
+              `Distributor ${distributor.value} does not exist in Firestore.`
+            );
+          }
+        } catch (error) {
+          console.error(
+            `Failed to update distributor ${distributor.value}:`,
+            error
+          );
+        }
+      }
+
       // Reset form and clear file uploads after submission
       setBookInfo({
         title: "",
@@ -65,7 +126,6 @@ const BookPublishingForm = () => {
         price: 0,
         isbn: "",
         categories: [],
-        releaseDate: "",
         ratings: [],
         soldCopies: 0,
         reviews: [],
@@ -214,6 +274,70 @@ const BookPublishingForm = () => {
         )}
       </div>
 
+      <h3 className="text-xl font-semibold text-gray-800 mt-6">
+        Distribution Settings
+      </h3>
+      <div className="flex gap-6 items-center">
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            checked={anyone}
+            onChange={() => {
+              setAnyone(true);
+              setOnlyMe(false);
+              updateBookInfoWithDistributors([]);
+            }}
+            className="h-5 w-5 text-blue-500 border-gray-300 rounded"
+          />
+          <span className="ml-2 text-gray-700">Anyone</span>
+        </label>
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            checked={onlyMe}
+            onChange={() => {
+              setOnlyMe(true);
+              setAnyone(false);
+              updateBookInfoWithDistributors([]);
+            }}
+            className="h-5 w-5 text-blue-500 border-gray-300 rounded"
+          />
+          <span className="ml-2 text-gray-700">Only Me</span>
+        </label>
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            checked={!onlyMe && !anyone}
+            onChange={() => {
+              setAnyone(false);
+              setOnlyMe(false);
+              updateBookInfoWithDistributors([]);
+            }}
+            className="h-5 w-5 text-blue-500 border-gray-300 rounded"
+          />
+          <span className="ml-2 text-gray-700">Custom Distributors</span>
+        </label>
+      </div>
+      {/* Select Distributors */}
+      {!(onlyMe || anyone) && (
+        <div className="mt-4">
+          <label
+            htmlFor="distributors"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Select Distributors
+          </label>
+          <Select
+            isMulti
+            options={users}
+            value={bookInfo.allowedDistributors}
+            onChange={handleDistributorChange}
+            placeholder="Select distributors"
+            className="w-full p-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ease-in-out duration-300"
+          />
+        </div>
+      )}
+
       {/* File Upload Section - Grid */}
       <div className="grid grid-cols-2 gap-6 mt-4">
         {/* Front Cover */}
@@ -303,69 +427,6 @@ const BookPublishingForm = () => {
           {errors.pdf && <p className="text-red-500 text-sm">{errors.pdf}</p>}
         </div>
       </div>
-      <h3 className="text-xl font-semibold text-gray-800 mt-6">
-        Distribution Settings
-      </h3>
-      <div className="flex gap-6 items-center">
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            checked={anyone}
-            onChange={() => {
-              setAnyone(true);
-              setOnlyMe(false);
-              updateBookInfoWithDistributors([]);
-            }}
-            className="h-5 w-5 text-blue-500 border-gray-300 rounded"
-          />
-          <span className="ml-2 text-gray-700">Anyone</span>
-        </label>
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            checked={onlyMe}
-            onChange={() => {
-              setOnlyMe(true);
-              setAnyone(false);
-              updateBookInfoWithDistributors([]);
-            }}
-            className="h-5 w-5 text-blue-500 border-gray-300 rounded"
-          />
-          <span className="ml-2 text-gray-700">Only Me</span>
-        </label>
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            checked={!onlyMe && !anyone}
-            onChange={() => {
-              setAnyone(false);
-              setOnlyMe(false);
-              updateBookInfoWithDistributors([]);
-            }}
-            className="h-5 w-5 text-blue-500 border-gray-300 rounded"
-          />
-          <span className="ml-2 text-gray-700">Custom Distributors</span>
-        </label>
-      </div>
-      {/* Select Distributors */}
-      {!(onlyMe || anyone) && (
-        <div className="mt-4">
-          <label
-            htmlFor="distributors"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Select Distributors
-          </label>
-          <Select
-            isMulti
-            options={users}
-            value={bookInfo.allowedDistributors}
-            onChange={handleDistributorChange}
-            placeholder="Select distributors"
-            className="w-full p-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ease-in-out duration-300"
-          />
-        </div>
-      )}
 
       {/* Submit Button */}
       <button

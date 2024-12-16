@@ -65,7 +65,7 @@ const PublishedBooksStatistics = () => {
             </div>
           ) : (
             <p className="text-gray-500 text-lg">
-              Loading best-selling book...
+              No books published yet. Click "Publish New Book" to get started.
             </p>
           )}
         </div>

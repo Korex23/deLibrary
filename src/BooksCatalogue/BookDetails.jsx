@@ -180,72 +180,79 @@ const BookDetails = () => {
             {/* Tasks Section */}
             {isBookBought && (
               <div className="mt-6 w-full">
-                <h2 className="text-2xl font-bold">Tasks</h2>
-                {currentBook?.question_answer.map((qna, index) => (
-                  <div
-                    key={index}
-                    className="mt-4 bg-gray-100 p-4 rounded-lg shadow-sm"
-                  >
-                    <p className="font-semibold text-lg">{qna.task}</p>
+                <h2
+                  className={`text-2xl font-bold ${
+                    currentBook.question_answer ? "hidden" : "block"
+                  }`}
+                >
+                  Tasks
+                </h2>
+                {currentBook.question_answer &&
+                  currentBook?.question_answer.map((qna, index) => (
+                    <div
+                      key={index}
+                      className="mt-4 bg-gray-100 p-4 rounded-lg shadow-sm"
+                    >
+                      <p className="font-semibold text-lg">{qna.task}</p>
 
-                    {/* Display Existing Answers */}
-                    <div className="mt-3">
-                      <h3 className="font-bold text-gray-700">Responses:</h3>
-                      {qna.answers && qna.answers.length > 0 ? (
-                        qna.answers.map((answer, idx) => (
-                          <p key={idx} className="text-gray-600 mt-2">
-                            {idx + 1}. {answer.response}
-                          </p>
-                        ))
-                      ) : (
-                        <p className="text-gray-500">No responses yet.</p>
-                      )}
-                    </div>
+                      {/* Display Existing Answers */}
+                      <div className="mt-3">
+                        <h3 className="font-bold text-gray-700">Responses:</h3>
+                        {qna.answers && qna.answers.length > 0 ? (
+                          qna.answers.map((answer, idx) => (
+                            <p key={idx} className="text-gray-600 mt-2">
+                              {idx + 1}. {answer.response}
+                            </p>
+                          ))
+                        ) : (
+                          <p className="text-gray-500">No responses yet.</p>
+                        )}
+                      </div>
 
-                    {/* Submit New Response */}
-                    <textarea
-                      placeholder="Write your response here..."
-                      value={responses[index] || ""}
-                      onChange={(e) =>
-                        setResponses((prev) => ({
-                          ...prev,
-                          [index]: e.target.value,
-                        }))
-                      }
-                      className="w-full border p-3 rounded-lg mt-3"
-                    />
-                    <button
-                      onClick={async () => {
-                        const responseText = responses[index]?.trim();
-                        if (responseText) {
-                          const updatedQnA = [...currentBook.question_answer];
-                          updatedQnA[index].answers = [
-                            ...(updatedQnA[index].answers || []),
-                            {
-                              uid: user?.uid,
-                              response: responseText,
-                            },
-                          ];
-
-                          // Update local state for responses
+                      {/* Submit New Response */}
+                      <textarea
+                        placeholder="Write your response here..."
+                        value={responses[index] || ""}
+                        onChange={(e) =>
                           setResponses((prev) => ({
                             ...prev,
-                            [index]: "",
-                          }));
-
-                          // Update Firestore
-                          const bookRef = doc(db, "books", bookId);
-                          await updateDoc(bookRef, {
-                            question_answer: updatedQnA,
-                          });
+                            [index]: e.target.value,
+                          }))
                         }
-                      }}
-                      className="bg-[#005097] hover:bg-blue-600 text-white py-2 px-4 rounded-lg mt-4"
-                    >
-                      Submit Response
-                    </button>
-                  </div>
-                ))}
+                        className="w-full border p-3 rounded-lg mt-3"
+                      />
+                      <button
+                        onClick={async () => {
+                          const responseText = responses[index]?.trim();
+                          if (responseText) {
+                            const updatedQnA = [...currentBook.question_answer];
+                            updatedQnA[index].answers = [
+                              ...(updatedQnA[index].answers || []),
+                              {
+                                uid: user?.uid,
+                                response: responseText,
+                              },
+                            ];
+
+                            // Update local state for responses
+                            setResponses((prev) => ({
+                              ...prev,
+                              [index]: "",
+                            }));
+
+                            // Update Firestore
+                            const bookRef = doc(db, "books", bookId);
+                            await updateDoc(bookRef, {
+                              question_answer: updatedQnA,
+                            });
+                          }
+                        }}
+                        className="bg-[#005097] hover:bg-blue-600 text-white py-2 px-4 rounded-lg mt-4"
+                      >
+                        Submit Response
+                      </button>
+                    </div>
+                  ))}
               </div>
             )}
           </div>

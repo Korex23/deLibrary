@@ -4,6 +4,7 @@ import BooksCard from "../components/Cards/BooksCard";
 import { useBooks } from "../context/BooksContext";
 import { useUser } from "../context/context";
 import AddTasksToBook from "../components/Cards/Author/AddTasksToBook";
+import { BsBook } from "react-icons/bs";
 
 import { Link } from "react-router-dom";
 
@@ -12,7 +13,6 @@ import PublishedBooksStatistics from "../components/Cards/Author/PublishedBooksS
 
 const AuthorDashboard = () => {
   const { getBookmarkedBooks, getPublishedBooks } = useBooks();
-  const [bookmarks, setBookmarks] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [openModal2, setOpenModal2] = useState(false);
   const [selectedBookId, setSelectedBookId] = useState(null);
@@ -37,13 +37,6 @@ const AuthorDashboard = () => {
     setSelectedBookId(null); // Clear the selected book ID
   };
 
-  const fetchBookmarkedBooks = useCallback(async () => {
-    if (user && user.uid) {
-      const books = await getBookmarkedBooks(user.uid);
-      setBookmarks(books);
-    }
-  }, [getBookmarkedBooks, user]);
-
   const fetchPublishedBooks = useCallback(async () => {
     if (user?.uid && booksPublished.length === 0) {
       const books = await getPublishedBooks();
@@ -54,9 +47,8 @@ const AuthorDashboard = () => {
   useEffect(() => {
     if (user?.uid) {
       fetchPublishedBooks();
-      fetchBookmarkedBooks();
     }
-  }, [user?.uid, fetchBookmarkedBooks, fetchPublishedBooks]);
+  }, [user?.uid, fetchPublishedBooks]);
 
   return (
     <div className="flex gap-5">
@@ -68,12 +60,13 @@ const AuthorDashboard = () => {
             <h1 className="text-3xl font-bold text-[#005097]">
               Author Dashboard
             </h1>
-            <button
-              onClick={openModalHandler}
-              className="bg-[#005097] hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium shadow-md"
-            >
-              Publish New Book
-            </button>
+          </div>
+          <div
+            onClick={openModalHandler}
+            className="flex items-center justify-center h-[150px] gap-2 bg-[#005097] hover:bg-blue-700 text-white text-3xl px-6 py-3 rounded-lg font-medium shadow-md mb-10 text-center cursor-pointer"
+          >
+            <BsBook className="text-4xl mr-5" />
+            <span>Publish New Book</span>
           </div>
 
           {/* Modal */}

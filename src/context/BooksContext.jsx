@@ -39,6 +39,7 @@ export const BooksProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [booksPublished, setBooksPublished] = useState([]);
   const [bookInfo, setBookInfo] = useState({
+    id: uuidv4(),
     title: "",
     frontCover: null,
     backCover: null,
@@ -192,7 +193,7 @@ export const BooksProvider = ({ children }) => {
 
       const bookWithId = {
         ...bookDataWithoutFiles,
-        id: bookInfo.id || uuidv4(),
+        id: bookInfo.id,
         authorId: user.uid,
         frontCoverUrl,
         backCoverUrl,

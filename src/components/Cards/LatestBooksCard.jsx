@@ -83,25 +83,74 @@ const LatestBooksCard = () => {
   }, []);
 
   const handleAddToCart = useCallback(async () => {
-    if (!selectedBook) return; // Ensure a book is selected
+    if (!selectedBook) {
+      console.log("No book selected");
+      return; // Ensure a book is selected
+    }
 
     try {
       let referrerDetails = null;
+
       if (activeReferralCode.trim()) {
+        console.log("Checking referral code:", activeReferralCode);
+
         const { isValid, referrerId } = await checkValidReferralCode(
           activeReferralCode
         );
 
-        if (isValid) {
-          referrerDetails = { id: referrerId };
-          setReferralCode(activeReferralCode);
-        } else {
+        console.log("Referral code validation result:", {
+          isValid,
+          referrerId,
+        });
+
+        if (!isValid) {
           setErrorMessage("Invalid referral code.");
+          console.log("Invalid referral code entered.");
           return;
         }
+
+        if (selectedBook.isDistributorsAllowed) {
+          const allowedDistributors = selectedBook.allowedDistributors || [];
+          console.log(
+            "Distributors allowed:",
+            selectedBook.isDistributorsAllowed
+          );
+          console.log("Allowed distributors:", allowedDistributors);
+
+          if (allowedDistributors.length > 0) {
+            console.log(
+              "Checking if referrerId is in allowedDistributors:",
+              referrerId
+            );
+
+            if (
+              !allowedDistributors.some(
+                (distributor) => distributor.value === referrerId
+              )
+            ) {
+              setErrorMessage(
+                "Referral code does not match any allowed distributor."
+              );
+              console.log(
+                "Referral code is valid but not in allowed distributors list."
+              );
+              return;
+            }
+          }
+        }
+
+        console.log("Referral code is valid and authorized.");
+        referrerDetails = { id: referrerId };
+        setReferralCode(activeReferralCode);
       }
 
       // Add to cart logic
+      console.log("Adding to cart:", {
+        selectedBook,
+        activeReferralCode,
+        referrerDetails,
+      });
+
       await addToCart(selectedBook, activeReferralCode, referrerDetails);
 
       // Reset modal state

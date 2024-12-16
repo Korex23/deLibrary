@@ -18,8 +18,13 @@ import Pagination from "../Pagination";
 
 const BooksForYou = () => {
   const { userDetails } = useUser();
-  const { allBooks, getBoughtBooks, bookmarks, getBookmarkedBooks } =
-    useBooks();
+  const {
+    allBooks,
+    getBoughtBooks,
+    bookmarks,
+    AddToBookmarks,
+    getBookmarkedBooks,
+  } = useBooks();
   const { cart, addToCart, setReferralCode } = useCart();
 
   const [activeReferralCode, setActiveReferralCode] = useState("");
@@ -35,13 +40,22 @@ const BooksForYou = () => {
   // Function to get books bought by the user
   const fetchBoughtBooks = async () => {
     if (userDetails) {
-      const books = await getBoughtBooks(userDetails.id);
-      const bookmarked = await getBookmarkedBooks(userDetails.id);
-      setBookmarkedBooks(bookmarked);
-      setBoughtBooks(books);
+      try {
+        const books = await getBoughtBooks(userDetails.id);
+        const bookmarked = await getBookmarkedBooks(userDetails.id);
 
-      setAllTheBooks([...books, ...bookmarked]);
-      console.log("All the books:", allTheBooks);
+        console.log("Bought books:", books); // Debugging
+        console.log("Bookmarked books:", bookmarked); // Debugging
+
+        const combinedBooks = [...books, ...bookmarked];
+        setBookmarkedBooks(bookmarked);
+        setBoughtBooks(books);
+        setAllTheBooks(combinedBooks);
+
+        console.log("All the books:", allTheBooks);
+      } catch (error) {
+        console.error("Error fetching books:", error);
+      }
     }
   };
 
@@ -82,7 +96,7 @@ const BooksForYou = () => {
       );
 
       // Store the filtered books in the state
-      setBooksForYou(booksForYou);
+      setBooksForYou(booksForYou.slice(0, 5));
       console.log("Books for you:", booksForYou);
     }
   };
@@ -94,7 +108,7 @@ const BooksForYou = () => {
   }, [userDetails]);
 
   useEffect(() => {
-    if (boughtBooks.length > 0) {
+    if (allTheBooks.length > 0) {
       getBooksForYou();
     }
   }, [boughtBooks]);
@@ -195,78 +209,85 @@ const BooksForYou = () => {
     <div>
       <div>
         <div className="grid grid-cols-1 place-items-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-9">
-          {booksForYou.map((book) => {
-            const isDisabled = isBookInCart(book.id) || isBookBought(book.id);
+          {booksForYou.length > 0 ? (
+            booksForYou.map((book) => {
+              const isDisabled = isBookInCart(book.id) || isBookBought(book.id);
 
-            return (
-              <div
-                key={book.id}
-                className="relative group p-4 bg-white rounded-lg shadow-md w-[190px]"
-              >
-                <Link to={`/books/${book.id}`} className="block">
-                  <img
-                    src={book.frontCoverUrl}
-                    alt={`Cover of ${book.title}`}
-                    className="h-28 w-28 object-cover rounded-lg mx-auto"
-                  />
-                  <h2 className="text-lg font-semibold mt-4 text-center">
-                    {book.title}
-                  </h2>
-                </Link>
-                <span className="text-gray-500 text-center block">
-                  ${book.price}
-                </span>
-                <p className="mt-4 text-gray-600 line-clamp-2">
-                  {authors[book.id]
-                    ? `${authors[book.id]}`
-                    : "Loading author..."}
-                </p>
-                <span className="text-gray-500 mt-4 block text-sm">
-                  {book.categories?.join(", ") || "No categories"}
-                </span>
+              return (
+                <div
+                  key={book.id}
+                  className="relative group p-4 bg-white rounded-lg shadow-md w-[190px]"
+                >
+                  <Link to={`/books/${book.id}`} className="block">
+                    <img
+                      src={book.frontCoverUrl}
+                      alt={`Cover of ${book.title}`}
+                      className="h-28 w-28 object-cover rounded-lg mx-auto"
+                    />
+                    <h2 className="text-lg font-semibold mt-4 text-center">
+                      {book.title}
+                    </h2>
+                  </Link>
+                  <span className="text-gray-500 text-center block">
+                    ${book.price}
+                  </span>
+                  <p className="mt-4 text-gray-600 line-clamp-2">
+                    {authors[book.id]
+                      ? `${authors[book.id]}`
+                      : "Loading author..."}
+                  </p>
+                  <span className="text-gray-500 mt-4 block text-sm">
+                    {book.categories?.join(", ") || "No categories"}
+                  </span>
 
-                {/* Hover Buttons */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                  <div className="flex gap-2 mb-4 pointer-events-auto">
-                    <button
-                      className={`py-2 px-4 rounded-lg ${
-                        isDisabled
-                          ? "bg-gray-300 text-gray-700 cursor-not-allowed"
-                          : "bg-[#005097] hover:bg-blue-600 text-white"
-                      }`}
-                      onClick={(e) => {
-                        e.preventDefault(); // Prevent default link behavior
-                        if (!isDisabled) {
-                          setSelectedBook(book);
-                          setIsModalOpen(true);
-                        }
-                      }}
-                      disabled={isDisabled}
-                    >
-                      <FaShoppingCart />
-                    </button>
+                  {/* Hover Buttons */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    <div className="flex gap-2 mb-4 pointer-events-auto">
+                      <button
+                        className={`py-2 px-4 rounded-lg ${
+                          isDisabled
+                            ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                            : "bg-[#005097] hover:bg-blue-600 text-white"
+                        }`}
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevent default link behavior
+                          if (!isDisabled) {
+                            setSelectedBook(book);
+                            setIsModalOpen(true);
+                          }
+                        }}
+                        disabled={isDisabled}
+                      >
+                        <FaShoppingCart />
+                      </button>
 
-                    <button
-                      className={`py-2 px-4 rounded-lg ${
-                        isBookBookmarked(book.id)
-                          ? "bg-gray-300 text-gray-700 cursor-not-allowed"
-                          : "bg-yellow-500 hover:bg-yellow-600 text-white"
-                      }`}
-                      onClick={(e) => {
-                        e.preventDefault(); // Prevent default link behavior
-                        if (!isBookBookmarked(book.id)) {
-                          AddToBookmarks(book.id);
-                        }
-                      }}
-                      disabled={isBookBookmarked(book.id)}
-                    >
-                      <FaBookmark />
-                    </button>
+                      <button
+                        className={`py-2 px-4 rounded-lg ${
+                          isBookBookmarked(book.id)
+                            ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                            : "bg-yellow-500 hover:bg-yellow-600 text-white"
+                        }`}
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevent default link behavior
+                          if (!isBookBookmarked(book.id)) {
+                            AddToBookmarks(book.id);
+                          }
+                        }}
+                        disabled={isBookBookmarked(book.id)}
+                      >
+                        <FaBookmark />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          ) : (
+            <p className="text-gray-600 text-2xl col-span-4">
+              No books for you yet. Please buy some books to get
+              recommendations.
+            </p>
+          )}
 
           {/* Modal */}
           {isModalOpen && (
