@@ -22,6 +22,7 @@ const Cart = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [role, setRole] = useState("student"); // Default to student
   const name = `${userDetails?.firstname || ""} ${userDetails?.lastname || ""}`;
+  const [disable, setDisable] = useState(false);
   const [formData, setFormData] = useState({
     school: "",
     name: name,
@@ -278,10 +279,14 @@ const Cart = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   payWithWallet(formData);
+                  setDisable(true);
                 }}
-                className="bg-green-500 text-white px-3 py-2 w-full rounded-lg"
+                className={`bg-green-500 text-white px-3 py-2 w-full rounded-lg ${
+                  disable ? "cursor-not-allowed" : "cursor-pointer"
+                }`}
+                disabled={disable}
               >
-                Pay with Wallet
+                {disable ? "Processing..." : "Pay with Wallet"}
               </button>
             </form>
 

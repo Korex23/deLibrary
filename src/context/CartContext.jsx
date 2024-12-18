@@ -414,10 +414,12 @@ export const CartProvider = ({ children }) => {
                 referrerDoc.data().referredUsers
               );
 
+              console.log(authorReferrerId);
+
               const updatedReferredUser = referrerDoc
                 .data()
                 .referredUsers.map((user) => {
-                  if (user.id === authorReferrerId) {
+                  if (user.id === book.authorId) {
                     console.log(
                       `Updating user ${user.id} with generated amount.`
                     );
